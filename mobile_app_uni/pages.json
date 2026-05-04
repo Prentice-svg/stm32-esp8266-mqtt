@@ -3,15 +3,15 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "IoT Environment Monitor"
+				"navigationBarTitleText": "环境监测终端"
 			}
 		}
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "IoT Environment Monitor",
-		"navigationBarBackgroundColor": "#F4F8FC",
-		"backgroundColor": "#F4F8FC"
+		"navigationBarTitleText": "环境监测终端",
+		"navigationBarBackgroundColor": "#EEF5F0",
+		"backgroundColor": "#EEF5F0"
 	},
 	"uniIdRouter": {}
 }

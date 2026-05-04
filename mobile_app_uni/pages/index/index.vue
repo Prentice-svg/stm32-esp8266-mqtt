@@ -1,71 +1,77 @@
 <template>
 	<view class="page">
 		<view class="hero">
-			<view class="hero-title">IoT Environment Monitor</view>
-			<view class="hero-subtitle">OneNET device dashboard for humidity, temperature, pressure, light, and LED control.</view>
+			<view class="hero-topline">OneNet 设备看板</view>
+			<view class="hero-title">环境监测终端</view>
+			<view class="hero-subtitle">实时查看温度、湿度、气压和光照强度，并远程控制板载 LED。</view>
 		</view>
 
-		<view class="status-bar">
-			<text class="status-label">Status</text>
-			<text class="status-value" :class="{ online: !loading && !errorMessage, error: !!errorMessage }">
-				{{ statusText }}
-			</text>
+		<view class="overview-panel">
+			<view class="overview-item">
+				<text class="overview-label">连接状态</text>
+				<text class="status-value" :class="{ online: !loading && !errorMessage, error: !!errorMessage }">
+					{{ statusText }}
+				</text>
+			</view>
+			<view class="overview-divider"></view>
+			<view class="overview-item align-right">
+				<text class="overview-label">最近同步</text>
+				<text class="overview-value">{{ lastSyncText }}</text>
+			</view>
 		</view>
 
-		<view class="sync-row">
-			<text class="sync-label">Last Sync</text>
-			<text class="sync-value">{{ lastSyncText }}</text>
+		<view class="section-head">
+			<view class="section-title">环境数据</view>
+			<view class="section-note">单位按当前物模型显示</view>
 		</view>
 
 		<view class="card-grid">
-			<view class="metric-card">
+			<view
+				v-for="metric in metrics"
+				:key="metric.key"
+				class="metric-card"
+				:class="metric.tone"
+			>
 				<view class="metric-head">
-					<view class="metric-name">Humidity</view>
-					<image class="metric-icon" src="/static/humidity.png" mode="aspectFit"></image>
+					<view>
+						<view class="metric-name">{{ metric.label }}</view>
+						<view class="metric-desc">{{ metric.desc }}</view>
+					</view>
+					<view class="metric-icon-badge" :class="metric.tone">
+						<text class="metric-icon-symbol">{{ metric.symbol }}</text>
+					</view>
 				</view>
-				<view class="metric-value">{{ humidityDisplay }}</view>
-				<view class="metric-unit">%RH</view>
-			</view>
-
-			<view class="metric-card">
-				<view class="metric-head">
-					<view class="metric-name">Temperature</view>
-					<image class="metric-icon" src="/static/temperature.png" mode="aspectFit"></image>
+				<view class="metric-value-row">
+					<text class="metric-value">{{ metric.value }}</text>
+					<text class="metric-unit">{{ metric.unit }}</text>
 				</view>
-				<view class="metric-value">{{ temperatureDisplay }}</view>
-				<view class="metric-unit">degC</view>
-			</view>
-
-			<view class="metric-card">
-				<view class="metric-head">
-					<view class="metric-name">Light</view>
-					<image class="metric-icon" src="/static/light.png" mode="aspectFit"></image>
-				</view>
-				<view class="metric-value">{{ lightDisplay }}</view>
-				<view class="metric-unit">%</view>
-			</view>
-
-			<view class="metric-card">
-				<view class="metric-head">
-					<view class="metric-name">Pressure</view>
-					<image class="metric-icon" src="/static/pressure.png" mode="aspectFit"></image>
-				</view>
-				<view class="metric-value">{{ pressureDisplay }}</view>
-				<view class="metric-unit">hPa</view>
-			</view>
-
-			<view class="metric-card led-card">
-				<view class="metric-head">
-					<view class="metric-name">LED</view>
-					<image class="metric-icon" src="/static/LED.png" mode="aspectFit"></image>
-				</view>
-				<switch :checked="LED" :disabled="ledSubmitting" @change="onLEDSwitch" color="#1d7dfa" />
-				<view class="led-text">{{ LED ? 'ON' : 'OFF' }}</view>
 			</view>
 		</view>
 
+		<view class="section-head control-head">
+			<view class="section-title">设备控制</view>
+			<view class="section-note">写入 OneNet 属性</view>
+		</view>
+
+		<view class="control-panel">
+			<view class="control-main">
+				<view class="control-icon-badge">
+					<text class="metric-icon-symbol">灯</text>
+				</view>
+				<view class="control-copy">
+					<view class="control-title">板载 LED</view>
+					<view class="control-subtitle">
+						当前状态：
+						<text class="control-state" :class="{ active: LED }">{{ LED ? '开启' : '关闭' }}</text>
+					</view>
+				</view>
+			</view>
+			<switch :checked="LED" :disabled="ledSubmitting" @change="onLEDSwitch" color="#0f9d58" />
+		</view>
+
 		<view v-if="errorMessage" class="error-box">
-			{{ errorMessage }}
+			<text class="error-title">请求失败</text>
+			<text class="error-text">{{ errorMessage }}</text>
 		</view>
 	</view>
 </template>
@@ -105,14 +111,22 @@ export default {
 		pressureDisplay() {
 			return this.formatMetric(this.pressure, 2)
 		},
+		metrics() {
+			return [
+				{ key: 'humi', label: '湿度', desc: '空气含湿量', value: this.humidityDisplay, unit: '%RH', symbol: '湿', tone: 'tone-blue' },
+				{ key: 'temp', label: '温度', desc: '环境温度', value: this.temperatureDisplay, unit: '°C', symbol: '温', tone: 'tone-orange' },
+				{ key: 'press', label: '气压', desc: '大气压强', value: this.pressureDisplay, unit: 'hPa', symbol: '压', tone: 'tone-green' },
+				{ key: 'light', label: '光照', desc: '光照强度', value: this.lightDisplay, unit: '%', symbol: '光', tone: 'tone-gold' }
+			]
+		},
 		statusText() {
 			if (this.errorMessage) {
-				return 'Request Failed'
+				return '异常'
 			}
 			if (this.loading) {
-				return 'Syncing'
+				return '同步中'
 			}
-			return 'Connected'
+			return '已连接'
 		}
 	},
 	onShow() {
@@ -154,10 +168,6 @@ export default {
 				clearInterval(this.pollingTimer)
 				this.pollingTimer = null
 			}
-		},
-		getPropertyValue(items, identifier) {
-			const item = items.find((entry) => entry.identifier === identifier)
-			return item ? item.value : null
 		},
 		getPropertyItem(items, identifier) {
 			return items.find((entry) => entry.identifier === identifier) || null
@@ -221,13 +231,13 @@ export default {
 				},
 				success: (res) => {
 					if (!res || !res.data || res.data.code !== 0) {
-						this.errorMessage = this.getApiMessage(res, 'Failed to fetch device data from OneNET.')
+						this.errorMessage = this.getApiMessage(res, '从 OneNet 获取设备数据失败。')
 						return
 					}
 
 					const items = res.data.data
 					if (!Array.isArray(items)) {
-						this.errorMessage = 'Unexpected device response.'
+						this.errorMessage = '设备返回格式不符合预期。'
 						return
 					}
 
@@ -235,7 +245,7 @@ export default {
 				},
 				fail: (err) => {
 					console.error('Failed to fetch device data', err)
-					this.errorMessage = 'Failed to fetch device data from OneNET.'
+					this.errorMessage = '从 OneNet 获取设备数据失败。'
 				},
 				complete: () => {
 					this.loading = false
@@ -265,7 +275,7 @@ export default {
 				success: (res) => {
 					if (!res || !res.data || res.data.code !== 0) {
 						this.LED = previousValue
-						this.errorMessage = this.getApiMessage(res, 'Failed to update LED state.')
+						this.errorMessage = this.getApiMessage(res, '写入 LED 状态失败。')
 						uni.showToast({
 							title: this.errorMessage,
 							icon: 'none'
@@ -274,16 +284,16 @@ export default {
 					}
 
 					uni.showToast({
-						title: `LED ${ledValue ? 'ON' : 'OFF'}`,
+						title: `LED 已${ledValue ? '开启' : '关闭'}`,
 						icon: 'none'
 					})
 				},
 				fail: (err) => {
 					console.error('Failed to control LED', err)
 					this.LED = previousValue
-					this.errorMessage = 'Failed to update LED state.'
+					this.errorMessage = '写入 LED 状态失败。'
 					uni.showToast({
-						title: 'LED update failed',
+						title: 'LED 控制失败',
 						icon: 'none'
 					})
 				},
@@ -299,53 +309,79 @@ export default {
 <style>
 .page {
 	min-height: 100vh;
-	padding: 18rpx;
-	background: linear-gradient(180deg, #eef6ff 0%, #f8fbff 35%, #ffffff 100%);
+	padding: 20rpx;
+	background:
+		radial-gradient(circle at top right, rgba(15, 157, 88, 0.12), transparent 28%),
+		radial-gradient(circle at top left, rgba(29, 125, 250, 0.14), transparent 30%),
+		linear-gradient(180deg, #eff6f2 0%, #f7fbf8 32%, #ffffff 100%);
 }
 
 .hero {
-	padding: 28rpx 24rpx;
-	border-radius: 24rpx;
-	background: linear-gradient(135deg, #143a52 0%, #1d7dfa 100%);
-	box-shadow: 0 18rpx 40rpx rgba(29, 125, 250, 0.18);
+	padding: 24rpx;
+	border-radius: 28rpx;
+	background: linear-gradient(140deg, #10344b 0%, #18607c 48%, #0f9d58 100%);
+	box-shadow: 0 18rpx 40rpx rgba(14, 56, 73, 0.18);
+}
+
+.hero-topline {
+	color: rgba(255, 255, 255, 0.74);
+	font-size: 20rpx;
+	letter-spacing: 2rpx;
 }
 
 .hero-title {
+	margin-top: 10rpx;
 	color: #ffffff;
-	font-size: 34rpx;
+	font-size: 42rpx;
 	font-weight: 700;
 }
 
 .hero-subtitle {
-	margin-top: 10rpx;
+	margin-top: 12rpx;
 	color: rgba(255, 255, 255, 0.82);
 	font-size: 22rpx;
-	line-height: 1.5;
+	line-height: 1.7;
 }
 
-.status-bar {
+.overview-panel {
 	margin-top: 18rpx;
-	padding: 18rpx 20rpx;
-	border-radius: 18rpx;
-	background: #ffffff;
+	padding: 22rpx 24rpx;
+	border-radius: 22rpx;
+	background: rgba(255, 255, 255, 0.92);
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	box-shadow: 0 10rpx 28rpx rgba(20, 58, 82, 0.08);
-	gap: 20rpx;
+	box-shadow: 0 12rpx 26rpx rgba(16, 52, 75, 0.07);
 }
 
-.status-label {
-	color: #5d7285;
-	font-size: 22rpx;
+.overview-item {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 8rpx;
 }
 
+.align-right {
+	align-items: flex-end;
+}
+
+.overview-label {
+	font-size: 20rpx;
+	color: #6b7f74;
+}
+
+.overview-value,
 .status-value {
-	color: #18794e;
 	font-size: 22rpx;
 	font-weight: 600;
-	text-align: right;
-	flex: 1;
+	color: #163347;
+}
+
+.overview-divider {
+	width: 2rpx;
+	height: 54rpx;
+	background: rgba(16, 52, 75, 0.08);
+	margin: 0 20rpx;
 }
 
 .status-value.error {
@@ -353,100 +389,244 @@ export default {
 }
 
 .status-value.online {
-	color: #18794e;
+	color: #0f9d58;
+}
+
+.section-head {
+	margin-top: 14rpx;
+	padding: 6rpx 6rpx 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.section-title {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #18384d;
+}
+
+.section-note {
+	font-size: 18rpx;
+	color: #7a8f84;
 }
 
 .card-grid {
-	margin-top: 14rpx;
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: space-between;
-	column-gap: 10rpx;
-	row-gap: 12rpx;
-}
-
-.sync-row {
 	margin-top: 12rpx;
-	padding: 0 4rpx;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-.sync-label,
-.sync-value {
-	font-size: 20rpx;
-	color: #6e8396;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12rpx;
 }
 
 .metric-card {
-	width: calc(50% - 5rpx);
-	min-height: 176rpx;
-	padding: 18rpx;
-	border-radius: 20rpx;
-	background: #ffffff;
-	box-shadow: 0 14rpx 32rpx rgba(15, 40, 60, 0.08);
+	min-height: 188rpx;
+	padding: 20rpx;
+	border-radius: 24rpx;
+	background: rgba(255, 255, 255, 0.98);
+	box-shadow: 0 12rpx 30rpx rgba(17, 44, 61, 0.08);
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	box-sizing: border-box;
+	position: relative;
+	overflow: hidden;
+}
+
+.metric-card::after {
+	content: '';
+	position: absolute;
+	right: -30rpx;
+	bottom: -34rpx;
+	width: 120rpx;
+	height: 120rpx;
+	border-radius: 50%;
+	opacity: 0.12;
+}
+
+.tone-blue::after {
+	background: #2d7ff9;
+}
+
+.tone-orange::after {
+	background: #ff8a3d;
+}
+
+.tone-green::after {
+	background: #10a86b;
+}
+
+.tone-gold::after {
+	background: #d9a21b;
 }
 
 .metric-head {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 12rpx;
 }
 
 .metric-name {
-	font-size: 24rpx;
+	font-size: 26rpx;
 	font-weight: 600;
-	color: #29465b;
+	color: #1e3a4d;
 }
 
-.metric-icon {
-	width: 58rpx;
-	height: 58rpx;
+.metric-desc {
+	margin-top: 6rpx;
+	font-size: 18rpx;
+	color: #7b8b96;
+}
+
+.metric-icon-badge,
+.control-icon-badge {
+	width: 64rpx;
+	height: 64rpx;
+	border-radius: 20rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	z-index: 1;
+}
+
+.metric-icon-badge.tone-blue {
+	background: linear-gradient(135deg, rgba(45, 127, 249, 0.16), rgba(45, 127, 249, 0.26));
+}
+
+.metric-icon-badge.tone-orange {
+	background: linear-gradient(135deg, rgba(255, 138, 61, 0.16), rgba(255, 138, 61, 0.26));
+}
+
+.metric-icon-badge.tone-green {
+	background: linear-gradient(135deg, rgba(16, 168, 107, 0.16), rgba(16, 168, 107, 0.26));
+}
+
+.metric-icon-badge.tone-gold {
+	background: linear-gradient(135deg, rgba(217, 162, 27, 0.16), rgba(217, 162, 27, 0.26));
+}
+
+.control-icon-badge {
+	background: linear-gradient(135deg, rgba(15, 157, 88, 0.16), rgba(15, 157, 88, 0.28));
+}
+
+.metric-icon-symbol {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #163347;
+}
+
+.metric-value-row {
+	margin-top: 22rpx;
+	display: flex;
+	align-items: flex-end;
+	gap: 10rpx;
+	position: relative;
+	z-index: 1;
 }
 
 .metric-value {
-	margin-top: 12rpx;
-	font-size: 38rpx;
+	font-size: 44rpx;
+	line-height: 1;
 	font-weight: 700;
 	color: #132534;
 }
 
 .metric-unit {
-	margin-top: 6rpx;
-	font-size: 18rpx;
-	color: #71879a;
+	font-size: 20rpx;
+	color: #63788c;
+	padding-bottom: 6rpx;
 }
 
-.led-card {
-	align-items: flex-start;
+.control-head {
+	margin-top: 16rpx;
 }
 
-.led-text {
+.control-panel {
 	margin-top: 12rpx;
-	font-size: 24rpx;
+	padding: 22rpx 24rpx;
+	border-radius: 24rpx;
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(241, 250, 245, 0.96));
+	box-shadow: 0 14rpx 28rpx rgba(17, 44, 61, 0.08);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16rpx;
+}
+
+.control-main {
+	display: flex;
+	align-items: center;
+	gap: 16rpx;
+}
+
+.control-copy {
+	display: flex;
+	flex-direction: column;
+	gap: 8rpx;
+}
+
+.control-title {
+	font-size: 28rpx;
 	font-weight: 700;
-	color: #132534;
+	color: #163347;
+}
+
+.control-subtitle {
+	font-size: 20rpx;
+	color: #6e8174;
+}
+
+.control-state {
+	color: #7a8894;
+	font-weight: 600;
+}
+
+.control-state.active {
+	color: #0f9d58;
 }
 
 .error-box {
-	margin-top: 24rpx;
-	padding: 22rpx 24rpx;
+	margin-top: 16rpx;
+	padding: 18rpx 20rpx;
 	border-radius: 20rpx;
-	background: #fff1f1;
-	color: #bb2d3b;
-	font-size: 24rpx;
-	line-height: 1.5;
+	background: rgba(209, 63, 63, 0.08);
+	display: flex;
+	flex-direction: column;
+	gap: 6rpx;
+}
+
+.error-title {
+	font-size: 22rpx;
+	font-weight: 700;
+	color: #bf2f2f;
+}
+
+.error-text {
+	font-size: 20rpx;
+	line-height: 1.6;
+	color: #c64a4a;
 }
 
 @media (max-width: 560px) {
-	.metric-card {
-		min-height: 168rpx;
+	.page {
 		padding: 16rpx;
+	}
+
+	.hero-title {
+		font-size: 38rpx;
+	}
+
+	.metric-card {
+		min-height: 174rpx;
+		padding: 18rpx;
+	}
+
+	.metric-value {
+		font-size: 38rpx;
+	}
+
+	.control-panel {
+		padding: 20rpx;
 	}
 }
 </style>

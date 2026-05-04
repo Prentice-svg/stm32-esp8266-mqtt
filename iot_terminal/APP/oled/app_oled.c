@@ -7,61 +7,98 @@ extern ScreenType global_screen_type;
 extern DisplayData global_display_data;
 extern osMutexId_t I2C1BusMutexHandle;
 
+static void OLED_DrawHeader(const char *title)
+{
+	OLED_ShowString(0, 0, (char *)title, OLED_8X16);
+	OLED_DrawLine(0, 15, 127, 15);
+}
+
+static void OLED_DrawFooter(const char *text)
+{
+	OLED_DrawLine(0, 55, 127, 55);
+	OLED_ShowString(0, 56, (char *)text, OLED_6X8);
+}
+
+static uint8_t OLED_ClampPercent(float value)
+{
+	if (value < 0.0f)
+	{
+		return 0;
+	}
+
+	if (value > 100.0f)
+	{
+		return 100;
+	}
+
+	return (uint8_t)(value + 0.5f);
+}
+
 static void OLED_DisplayOverview(void)
 {
-	OLED_ShowString(0, 0, "[P1]Overview", OLED_8X16);
+	OLED_DrawHeader("P1 OVERVIEW");
 
 	if (global_display_data.dht11_check_result == DHT11_DATA_OK)
 	{
-		OLED_Printf(0, 16, OLED_6X8, "T:%05.1fC  H:%05.1f%%", global_display_data.temp_value, global_display_data.humi_value);
-		OLED_Printf(0, 24, OLED_6X8, "P:%07.2fhPa", global_display_data.pressure_hpa);
+		OLED_Printf(0, 19, OLED_6X8, "TEMP  %5.1f C", global_display_data.temp_value);
+		OLED_Printf(0, 29, OLED_6X8, "HUMI  %5.1f %%", global_display_data.humi_value);
+		OLED_Printf(0, 39, OLED_6X8, "PRES %7.2f", global_display_data.pressure_hpa);
 	}
 	else
 	{
-		OLED_ShowString(0, 16, "AHT20/BMP ERR", OLED_8X16);
+		OLED_ShowString(0, 22, "AHT20/BMP ERROR", OLED_6X8);
 	}
 
-	OLED_Printf(0, 40, OLED_6X8, "Light:%05.1f%%", global_display_data.light_percentage_value);
-	OLED_ShowString(0, 56, "K1:Next K2:LED", OLED_6X8);
+	OLED_Printf(0, 49, OLED_6X8, "LIGHT %5.1f %%", global_display_data.light_percentage_value);
+	OLED_DrawFooter("K1 NEXT   K2 LED");
 }
 
 static void OLED_DisplayTempHumi(void)
 {
-	OLED_ShowString(0, 0, "[P2]Temp/Humi", OLED_8X16);
+	OLED_DrawHeader("P2 TEMP HUMI");
 
 	if (global_display_data.dht11_check_result == DHT11_DATA_OK)
 	{
-		OLED_Printf(0, 16, OLED_8X16, "T:%+06.2f C", global_display_data.temp_value);
-		OLED_Printf(0, 32, OLED_8X16, "H:%06.2f %%", global_display_data.humi_value);
+		OLED_ShowString(0, 19, "TEMP", OLED_6X8);
+		OLED_Printf(0, 27, OLED_8X16, "%5.1f C", global_display_data.temp_value);
+		OLED_ShowString(0, 45, "HUMI", OLED_6X8);
+		OLED_Printf(0, 53, OLED_6X8, "%5.1f %%RH", global_display_data.humi_value);
 	}
 	else
 	{
-		OLED_ShowString(0, 16, "DATA ERROR", OLED_8X16);
+		OLED_ShowString(0, 28, "SENSOR DATA ERROR", OLED_6X8);
 	}
 }
 
 static void OLED_DisplayPressure(void)
 {
-	OLED_ShowString(0, 0, "[P3]Pressure", OLED_8X16);
+	OLED_DrawHeader("P3 PRESSURE");
 
 	if (global_display_data.dht11_check_result == DHT11_DATA_OK)
 	{
-		OLED_Printf(0, 16, OLED_8X16, "%07.2f hPa", global_display_data.pressure_hpa);
-		OLED_Printf(0, 32, OLED_6X8, "Max:%07.2f", global_display_data.pressure_hpa_max);
-		OLED_Printf(0, 40, OLED_6X8, "Min:%07.2f", global_display_data.pressure_hpa_min);
+		OLED_ShowString(0, 19, "CURRENT", OLED_6X8);
+		OLED_Printf(0, 27, OLED_8X16, "%7.2f", global_display_data.pressure_hpa);
+		OLED_ShowString(88, 35, "hPa", OLED_6X8);
+		OLED_Printf(0, 46, OLED_6X8, "MAX %7.2f", global_display_data.pressure_hpa_max);
+		OLED_Printf(0, 56, OLED_6X8, "MIN %7.2f", global_display_data.pressure_hpa_min);
 	}
 	else
 	{
-		OLED_ShowString(0, 16, "DATA ERROR", OLED_8X16);
+		OLED_ShowString(0, 28, "SENSOR DATA ERROR", OLED_6X8);
 	}
 }
 
 static void OLED_DisplayLight(void)
 {
-	OLED_ShowString(0, 0, "[P4]Light", OLED_8X16);
-	OLED_Printf(0, 16, OLED_8X16, "Now: %06.2f %%", global_display_data.light_percentage_value);
-	OLED_Printf(0, 32, OLED_8X16, "Max: %06.2f %%", global_display_data.light_percentage_max);
-	OLED_Printf(0, 48, OLED_8X16, "Min: %06.2f %%", global_display_data.light_percentage_min);
+	uint8_t bar_width = OLED_ClampPercent(global_display_data.light_percentage_value);
+
+	OLED_DrawHeader("P4 LIGHT");
+	OLED_ShowString(0, 19, "LEVEL", OLED_6X8);
+	OLED_Printf(0, 27, OLED_8X16, "%5.1f %%", global_display_data.light_percentage_value);
+	OLED_DrawRectangle(0, 46, 102, 10, OLED_UNFILLED);
+	OLED_DrawRectangle(2, 48, bar_width, 6, OLED_FILLED);
+	OLED_Printf(106, 47, OLED_6X8, "%3d", bar_width);
+	OLED_Printf(0, 57, OLED_6X8, "MAX %5.1f  MIN %5.1f", global_display_data.light_percentage_max, global_display_data.light_percentage_min);
 }
 
 typedef void (*OLEDScreenHandler)(void);
