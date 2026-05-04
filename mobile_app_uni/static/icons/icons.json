@@ -1,0 +1,590 @@
+[
+  {
+    "name": "fire_alarm_sensor_basic",
+    "file": "/static/icons/fire_alarm_sensor_basic.png",
+    "label": "Fire alarm sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "co2_sensor_basic",
+    "file": "/static/icons/co2_sensor_basic.png",
+    "label": "Carbon dioxide sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "co_sensor_basic",
+    "file": "/static/icons/co_sensor_basic.png",
+    "label": "Carbon monoxide sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "temperature_sensor_basic",
+    "file": "/static/icons/temperature_sensor_basic.png",
+    "label": "Temperature sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "humidity_sensor_basic",
+    "file": "/static/icons/humidity_sensor_basic.png",
+    "label": "Humidity sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "smoke_sensor_basic",
+    "file": "/static/icons/smoke_sensor_basic.png",
+    "label": "Smoke sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "combustible_gas_sensor_basic",
+    "file": "/static/icons/combustible_gas_sensor_basic.png",
+    "label": "Combustible gas sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "pm25_sensor_basic",
+    "file": "/static/icons/pm25_sensor_basic.png",
+    "label": "PM2.5 sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "light_sensor_basic",
+    "file": "/static/icons/light_sensor_basic.png",
+    "label": "Light sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "motion_sensor_basic",
+    "file": "/static/icons/motion_sensor_basic.png",
+    "label": "Human presence sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "water_leak_sensor_basic",
+    "file": "/static/icons/water_leak_sensor_basic.png",
+    "label": "Water leak sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "door_magnetic_sensor_basic",
+    "file": "/static/icons/door_magnetic_sensor_basic.png",
+    "label": "Door magnetic sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_26_24.png",
+    "source_set": "basic"
+  },
+  {
+    "name": "fire_alarm_sensor_sensor_a",
+    "file": "/static/icons/fire_alarm_sensor_sensor_a.png",
+    "label": "Fire alarm sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "co2_sensor_sensor_a",
+    "file": "/static/icons/co2_sensor_sensor_a.png",
+    "label": "Carbon dioxide sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "co_sensor_sensor_a",
+    "file": "/static/icons/co_sensor_sensor_a.png",
+    "label": "Carbon monoxide sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "temperature_sensor_sensor_a",
+    "file": "/static/icons/temperature_sensor_sensor_a.png",
+    "label": "Temperature sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "humidity_sensor_sensor_a",
+    "file": "/static/icons/humidity_sensor_sensor_a.png",
+    "label": "Humidity sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "smoke_sensor_sensor_a",
+    "file": "/static/icons/smoke_sensor_sensor_a.png",
+    "label": "Smoke sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "combustible_gas_sensor_sensor_a",
+    "file": "/static/icons/combustible_gas_sensor_sensor_a.png",
+    "label": "Combustible gas sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "pm25_sensor_sensor_a",
+    "file": "/static/icons/pm25_sensor_sensor_a.png",
+    "label": "PM2.5 sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "light_sensor_sensor_a",
+    "file": "/static/icons/light_sensor_sensor_a.png",
+    "label": "Light sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "motion_sensor_sensor_a",
+    "file": "/static/icons/motion_sensor_sensor_a.png",
+    "label": "Human presence sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "water_leak_sensor_sensor_a",
+    "file": "/static/icons/water_leak_sensor_sensor_a.png",
+    "label": "Water leak sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "door_magnetic_sensor_sensor_a",
+    "file": "/static/icons/door_magnetic_sensor_sensor_a.png",
+    "label": "Door magnetic sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "air_pressure_sensor_sensor_a",
+    "file": "/static/icons/air_pressure_sensor_sensor_a.png",
+    "label": "Air pressure sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "uv_sensor_sensor_a",
+    "file": "/static/icons/uv_sensor_sensor_a.png",
+    "label": "Ultraviolet sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "formaldehyde_sensor_sensor_a",
+    "file": "/static/icons/formaldehyde_sensor_sensor_a.png",
+    "label": "Formaldehyde sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "soil_moisture_sensor_sensor_a",
+    "file": "/static/icons/soil_moisture_sensor_sensor_a.png",
+    "label": "Soil moisture sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "soil_temperature_sensor_sensor_a",
+    "file": "/static/icons/soil_temperature_sensor_sensor_a.png",
+    "label": "Soil temperature sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "ph_sensor_sensor_a",
+    "file": "/static/icons/ph_sensor_sensor_a.png",
+    "label": "pH sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (2).png",
+    "source_set": "sensor_a"
+  },
+  {
+    "name": "fan_control_device_b",
+    "file": "/static/icons/fan_control_device_b.png",
+    "label": "Fan control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "door_lock_control_device_b",
+    "file": "/static/icons/door_lock_control_device_b.png",
+    "label": "Door lock control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "alarm_status_device_b",
+    "file": "/static/icons/alarm_status_device_b.png",
+    "label": "Alarm status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "curtain_control_device_b",
+    "file": "/static/icons/curtain_control_device_b.png",
+    "label": "Curtain control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "air_conditioner_control_device_b",
+    "file": "/static/icons/air_conditioner_control_device_b.png",
+    "label": "Air conditioner control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "grow_light_control_device_b",
+    "file": "/static/icons/grow_light_control_device_b.png",
+    "label": "Grow light control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "pest_control_device_b",
+    "file": "/static/icons/pest_control_device_b.png",
+    "label": "Pest control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "occupancy_status_device_b",
+    "file": "/static/icons/occupancy_status_device_b.png",
+    "label": "Occupancy status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "water_level_status_device_b",
+    "file": "/static/icons/water_level_status_device_b.png",
+    "label": "Water level status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "gas_concentration_sensor_device_b",
+    "file": "/static/icons/gas_concentration_sensor_device_b.png",
+    "label": "Gas concentration sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "heating_control_device_b",
+    "file": "/static/icons/heating_control_device_b.png",
+    "label": "Heating control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "supplemental_light_control_device_b",
+    "file": "/static/icons/supplemental_light_control_device_b.png",
+    "label": "Supplemental light control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "mode_setting_device_b",
+    "file": "/static/icons/mode_setting_device_b.png",
+    "label": "Mode setting",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "water_pump_control_device_b",
+    "file": "/static/icons/water_pump_control_device_b.png",
+    "label": "Water pump control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "cooling_control_device_b",
+    "file": "/static/icons/cooling_control_device_b.png",
+    "label": "Cooling control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "gas_valve_control_device_b",
+    "file": "/static/icons/gas_valve_control_device_b.png",
+    "label": "Gas valve control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "force_sensor_device_b",
+    "file": "/static/icons/force_sensor_device_b.png",
+    "label": "Force sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "noise_sensor_device_b",
+    "file": "/static/icons/noise_sensor_device_b.png",
+    "label": "Noise sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_06 (3).png",
+    "source_set": "device_b"
+  },
+  {
+    "name": "led_status_control_c",
+    "file": "/static/icons/led_status_control_c.png",
+    "label": "LED status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "switch_status_control_c",
+    "file": "/static/icons/switch_status_control_c.png",
+    "label": "Switch status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "relay_control_control_c",
+    "file": "/static/icons/relay_control_control_c.png",
+    "label": "Relay control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "motor_control_control_c",
+    "file": "/static/icons/motor_control_control_c.png",
+    "label": "Motor control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "buzzer_control_control_c",
+    "file": "/static/icons/buzzer_control_control_c.png",
+    "label": "Buzzer control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "vibration_sensor_control_c",
+    "file": "/static/icons/vibration_sensor_control_c.png",
+    "label": "Vibration sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "tilt_sensor_control_c",
+    "file": "/static/icons/tilt_sensor_control_c.png",
+    "label": "Tilt sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "touch_sensor_control_c",
+    "file": "/static/icons/touch_sensor_control_c.png",
+    "label": "Touch sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "button_status_control_c",
+    "file": "/static/icons/button_status_control_c.png",
+    "label": "Button status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "infrared_beam_sensor_control_c",
+    "file": "/static/icons/infrared_beam_sensor_control_c.png",
+    "label": "Infrared beam sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "battery_level_control_c",
+    "file": "/static/icons/battery_level_control_c.png",
+    "label": "Battery level",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "charging_status_control_c",
+    "file": "/static/icons/charging_status_control_c.png",
+    "label": "Charging status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "voltage_sensor_control_c",
+    "file": "/static/icons/voltage_sensor_control_c.png",
+    "label": "Voltage sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "current_sensor_control_c",
+    "file": "/static/icons/current_sensor_control_c.png",
+    "label": "Current sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "power_sensor_control_c",
+    "file": "/static/icons/power_sensor_control_c.png",
+    "label": "Power sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "energy_meter_control_c",
+    "file": "/static/icons/energy_meter_control_c.png",
+    "label": "Energy meter",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "leakage_protection_control_c",
+    "file": "/static/icons/leakage_protection_control_c.png",
+    "label": "Leakage protection",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "fuse_status_control_c",
+    "file": "/static/icons/fuse_status_control_c.png",
+    "label": "Fuse status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (4).png",
+    "source_set": "control_c"
+  },
+  {
+    "name": "wifi_status_system_d",
+    "file": "/static/icons/wifi_status_system_d.png",
+    "label": "Wi-Fi status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "bluetooth_status_system_d",
+    "file": "/static/icons/bluetooth_status_system_d.png",
+    "label": "Bluetooth status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "signal_strength_system_d",
+    "file": "/static/icons/signal_strength_system_d.png",
+    "label": "Signal strength",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "cloud_connection_status_system_d",
+    "file": "/static/icons/cloud_connection_status_system_d.png",
+    "label": "Cloud connection status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "camera_status_system_d",
+    "file": "/static/icons/camera_status_system_d.png",
+    "label": "Camera status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "microphone_status_system_d",
+    "file": "/static/icons/microphone_status_system_d.png",
+    "label": "Microphone status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "light_brightness_system_d",
+    "file": "/static/icons/light_brightness_system_d.png",
+    "label": "Light brightness",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "color_temperature_system_d",
+    "file": "/static/icons/color_temperature_system_d.png",
+    "label": "Color temperature",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "wind_speed_sensor_system_d",
+    "file": "/static/icons/wind_speed_sensor_system_d.png",
+    "label": "Wind speed sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "wind_direction_sensor_system_d",
+    "file": "/static/icons/wind_direction_sensor_system_d.png",
+    "label": "Wind direction sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "rainfall_sensor_system_d",
+    "file": "/static/icons/rainfall_sensor_system_d.png",
+    "label": "Rainfall sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "liquid_level_sensor_system_d",
+    "file": "/static/icons/liquid_level_sensor_system_d.png",
+    "label": "Liquid level sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "flow_rate_sensor_system_d",
+    "file": "/static/icons/flow_rate_sensor_system_d.png",
+    "label": "Flow rate sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "valve_control_system_d",
+    "file": "/static/icons/valve_control_system_d.png",
+    "label": "Valve control",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "gps_location_system_d",
+    "file": "/static/icons/gps_location_system_d.png",
+    "label": "GPS location",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "timer_status_system_d",
+    "file": "/static/icons/timer_status_system_d.png",
+    "label": "Timer status",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "oxygen_sensor_system_d",
+    "file": "/static/icons/oxygen_sensor_system_d.png",
+    "label": "Oxygen sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  },
+  {
+    "name": "ammonia_sensor_system_d",
+    "file": "/static/icons/ammonia_sensor_system_d.png",
+    "label": "Ammonia sensor",
+    "source": "ChatGPT Image 2026年5月5日 07_49_07 (5).png",
+    "source_set": "system_d"
+  }
+]

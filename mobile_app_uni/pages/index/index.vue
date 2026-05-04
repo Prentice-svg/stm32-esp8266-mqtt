@@ -1,72 +1,49 @@
 <template>
 	<view class="page">
-		<view class="hero">
-			<view class="hero-topline">OneNet 设备看板</view>
-			<view class="hero-title">环境监测终端</view>
-			<view class="hero-subtitle">实时查看温度、湿度、气压和光照强度，并远程控制板载 LED。</view>
-		</view>
-
-		<view class="overview-panel">
-			<view class="overview-item">
-				<text class="overview-label">连接状态</text>
-				<text class="status-value" :class="{ online: !loading && !errorMessage, error: !!errorMessage }">
-					{{ statusText }}
-				</text>
-			</view>
-			<view class="overview-divider"></view>
-			<view class="overview-item align-right">
-				<text class="overview-label">最近同步</text>
-				<text class="overview-value">{{ lastSyncText }}</text>
-			</view>
-		</view>
-
-		<view class="section-head">
-			<view class="section-title">环境数据</view>
-			<view class="section-note">单位按当前物模型显示</view>
+		<view class="page-title">
+			<view class="title-main">IoT 环境监测终端</view>
+			<view class="title-sub">OneNet Device Dashboard</view>
 		</view>
 
 		<view class="card-grid">
 			<view
-				v-for="metric in metrics"
-				:key="metric.key"
-				class="metric-card"
-				:class="metric.tone"
+				v-for="card in dashboardCards"
+				:key="card.key"
+				class="dashboard-card"
 			>
-				<view class="metric-head">
-					<view>
-						<view class="metric-name">{{ metric.label }}</view>
-						<view class="metric-desc">{{ metric.desc }}</view>
-					</view>
-					<view class="metric-icon-badge" :class="metric.tone">
-						<text class="metric-icon-symbol">{{ metric.symbol }}</text>
-					</view>
+				<image class="card-icon" :src="card.icon" mode="aspectFit" />
+				<view class="card-label">{{ card.label }}</view>
+				<view class="card-divider"></view>
+				<view class="card-value-row">
+					<text class="card-value" :class="card.tone">{{ card.value }}</text>
+					<text v-if="card.unit" class="card-unit">{{ card.unit }}</text>
 				</view>
-				<view class="metric-value-row">
-					<text class="metric-value">{{ metric.value }}</text>
-					<text class="metric-unit">{{ metric.unit }}</text>
+			</view>
+
+			<view class="dashboard-card control-card">
+				<image class="card-icon" src="/static/icons/led_status_control_c.png" mode="aspectFit" />
+				<view class="card-label">板载 LED</view>
+				<view class="card-divider"></view>
+				<view class="card-value-row control-value-row">
+					<text class="card-value" :class="LED ? 'tone-green' : 'tone-gray'">
+						{{ LED ? '开启' : '关闭' }}
+					</text>
+					<switch class="led-switch" :checked="LED" :disabled="ledSubmitting" @change="onLEDSwitch" color="#11823b" />
 				</view>
 			</view>
 		</view>
 
-		<view class="section-head control-head">
-			<view class="section-title">设备控制</view>
-			<view class="section-note">写入 OneNet 属性</view>
-		</view>
-
-		<view class="control-panel">
-			<view class="control-main">
-				<view class="control-icon-badge">
-					<text class="metric-icon-symbol">灯</text>
-				</view>
-				<view class="control-copy">
-					<view class="control-title">板载 LED</view>
-					<view class="control-subtitle">
-						当前状态：
-						<text class="control-state" :class="{ active: LED }">{{ LED ? '开启' : '关闭' }}</text>
-					</view>
-				</view>
+		<view class="status-grid">
+			<view class="status-card">
+				<text class="status-label">连接状态</text>
+				<text class="status-text" :class="{ online: !loading && !errorMessage, error: !!errorMessage }">
+					{{ statusText }}
+				</text>
 			</view>
-			<switch :checked="LED" :disabled="ledSubmitting" @change="onLEDSwitch" color="#0f9d58" />
+			<view class="status-card">
+				<text class="status-label">最近同步</text>
+				<text class="status-text tone-blue">{{ lastSyncText }}</text>
+			</view>
 		</view>
 
 		<view v-if="errorMessage" class="error-box">
@@ -111,12 +88,40 @@ export default {
 		pressureDisplay() {
 			return this.formatMetric(this.pressure, 2)
 		},
-		metrics() {
+		dashboardCards() {
 			return [
-				{ key: 'humi', label: '湿度', desc: '空气含湿量', value: this.humidityDisplay, unit: '%RH', symbol: '湿', tone: 'tone-blue' },
-				{ key: 'temp', label: '温度', desc: '环境温度', value: this.temperatureDisplay, unit: '°C', symbol: '温', tone: 'tone-orange' },
-				{ key: 'press', label: '气压', desc: '大气压强', value: this.pressureDisplay, unit: 'hPa', symbol: '压', tone: 'tone-green' },
-				{ key: 'light', label: '光照', desc: '光照强度', value: this.lightDisplay, unit: '%', symbol: '光', tone: 'tone-gold' }
+				{
+					key: 'temp',
+					label: '温度',
+					value: this.temperatureDisplay,
+					unit: '°C',
+					icon: '/static/icons/temperature_sensor_sensor_a.png',
+					tone: 'tone-blue'
+				},
+				{
+					key: 'humi',
+					label: '湿度',
+					value: this.humidityDisplay,
+					unit: '%RH',
+					icon: '/static/icons/humidity_sensor_sensor_a.png',
+					tone: 'tone-blue'
+				},
+				{
+					key: 'press',
+					label: '大气压强',
+					value: this.pressureDisplay,
+					unit: 'hPa',
+					icon: '/static/icons/air_pressure_sensor_sensor_a.png',
+					tone: 'tone-blue'
+				},
+				{
+					key: 'light',
+					label: '光照',
+					value: this.lightDisplay,
+					unit: '%',
+					icon: '/static/icons/light_sensor_sensor_a.png',
+					tone: 'tone-orange'
+				}
 			]
 		},
 		statusText() {
@@ -309,285 +314,179 @@ export default {
 <style>
 .page {
 	min-height: 100vh;
-	padding: 20rpx;
-	background:
-		radial-gradient(circle at top right, rgba(15, 157, 88, 0.12), transparent 28%),
-		radial-gradient(circle at top left, rgba(29, 125, 250, 0.14), transparent 30%),
-		linear-gradient(180deg, #eff6f2 0%, #f7fbf8 32%, #ffffff 100%);
+	padding: 18rpx;
+	background: radial-gradient(circle at top, #ffffff 0%, #f4f7f8 62%, #eef2f4 100%);
+	color: #0f1419;
+	font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", "Source Han Sans SC", sans-serif;
 }
 
-.hero {
-	padding: 24rpx;
-	border-radius: 28rpx;
-	background: linear-gradient(140deg, #10344b 0%, #18607c 48%, #0f9d58 100%);
-	box-shadow: 0 18rpx 40rpx rgba(14, 56, 73, 0.18);
+.page-title {
+	padding: 12rpx 0 18rpx;
+	text-align: center;
 }
 
-.hero-topline {
-	color: rgba(255, 255, 255, 0.74);
-	font-size: 20rpx;
-	letter-spacing: 2rpx;
+.title-main {
+	font-size: 36rpx;
+	line-height: 1.16;
+	font-weight: 800;
+	color: #11161c;
 }
 
-.hero-title {
-	margin-top: 10rpx;
-	color: #ffffff;
-	font-size: 42rpx;
-	font-weight: 700;
-}
-
-.hero-subtitle {
-	margin-top: 12rpx;
-	color: rgba(255, 255, 255, 0.82);
+.title-sub {
+	margin-top: 6rpx;
 	font-size: 22rpx;
-	line-height: 1.7;
-}
-
-.overview-panel {
-	margin-top: 18rpx;
-	padding: 22rpx 24rpx;
-	border-radius: 22rpx;
-	background: rgba(255, 255, 255, 0.92);
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	box-shadow: 0 12rpx 26rpx rgba(16, 52, 75, 0.07);
-}
-
-.overview-item {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	gap: 8rpx;
-}
-
-.align-right {
-	align-items: flex-end;
-}
-
-.overview-label {
-	font-size: 20rpx;
-	color: #6b7f74;
-}
-
-.overview-value,
-.status-value {
-	font-size: 22rpx;
-	font-weight: 600;
-	color: #163347;
-}
-
-.overview-divider {
-	width: 2rpx;
-	height: 54rpx;
-	background: rgba(16, 52, 75, 0.08);
-	margin: 0 20rpx;
-}
-
-.status-value.error {
-	color: #d13f3f;
-}
-
-.status-value.online {
-	color: #0f9d58;
-}
-
-.section-head {
-	margin-top: 14rpx;
-	padding: 6rpx 6rpx 0;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-}
-
-.section-title {
-	font-size: 28rpx;
-	font-weight: 700;
-	color: #18384d;
-}
-
-.section-note {
-	font-size: 18rpx;
-	color: #7a8f84;
+	line-height: 1.2;
+	font-weight: 400;
+	color: #4a5663;
 }
 
 .card-grid {
-	margin-top: 12rpx;
+	width: 100%;
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 12rpx;
+	gap: 16rpx;
 }
 
-.metric-card {
-	min-height: 188rpx;
-	padding: 20rpx;
-	border-radius: 24rpx;
-	background: rgba(255, 255, 255, 0.98);
-	box-shadow: 0 12rpx 30rpx rgba(17, 44, 61, 0.08);
+.dashboard-card {
+	min-height: 252rpx;
+	padding: 18rpx 20rpx 18rpx;
+	border: 1rpx solid rgba(22, 31, 40, 0.08);
+	border-radius: 22rpx;
+	background: rgba(255, 255, 255, 0.96);
+	box-shadow: 0 10rpx 24rpx rgba(24, 34, 45, 0.11);
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
-	position: relative;
-	overflow: hidden;
-}
-
-.metric-card::after {
-	content: '';
-	position: absolute;
-	right: -30rpx;
-	bottom: -34rpx;
-	width: 120rpx;
-	height: 120rpx;
-	border-radius: 50%;
-	opacity: 0.12;
-}
-
-.tone-blue::after {
-	background: #2d7ff9;
-}
-
-.tone-orange::after {
-	background: #ff8a3d;
-}
-
-.tone-green::after {
-	background: #10a86b;
-}
-
-.tone-gold::after {
-	background: #d9a21b;
-}
-
-.metric-head {
-	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	gap: 12rpx;
 }
 
-.metric-name {
-	font-size: 26rpx;
-	font-weight: 600;
-	color: #1e3a4d;
+.card-icon {
+	width: 160rpx;
+	height: 132rpx;
+	flex: 0 0 auto;
 }
 
-.metric-desc {
-	margin-top: 6rpx;
-	font-size: 18rpx;
-	color: #7b8b96;
+.card-label {
+	margin-top: 4rpx;
+	min-height: 30rpx;
+	font-size: 22rpx;
+	line-height: 1.25;
+	font-weight: 700;
+	color: #111821;
+	text-align: center;
 }
 
-.metric-icon-badge,
-.control-icon-badge {
-	width: 64rpx;
-	height: 64rpx;
-	border-radius: 20rpx;
+.card-divider {
+	width: 100%;
+	height: 2rpx;
+	margin: 11rpx 0 8rpx;
+	background: #d9dee2;
+}
+
+.card-value-row {
+	min-height: 44rpx;
 	display: flex;
-	align-items: center;
+	align-items: baseline;
 	justify-content: center;
-	position: relative;
-	z-index: 1;
+	gap: 8rpx;
+	white-space: nowrap;
 }
 
-.metric-icon-badge.tone-blue {
-	background: linear-gradient(135deg, rgba(45, 127, 249, 0.16), rgba(45, 127, 249, 0.26));
+.card-value {
+	font-size: 36rpx;
+	line-height: 1.1;
+	font-weight: 800;
 }
 
-.metric-icon-badge.tone-orange {
-	background: linear-gradient(135deg, rgba(255, 138, 61, 0.16), rgba(255, 138, 61, 0.26));
+.card-unit {
+	font-size: 19rpx;
+	line-height: 1.2;
+	font-weight: 500;
+	color: #314050;
 }
 
-.metric-icon-badge.tone-green {
-	background: linear-gradient(135deg, rgba(16, 168, 107, 0.16), rgba(16, 168, 107, 0.26));
+.control-card {
+	cursor: pointer;
 }
 
-.metric-icon-badge.tone-gold {
-	background: linear-gradient(135deg, rgba(217, 162, 27, 0.16), rgba(217, 162, 27, 0.26));
-}
-
-.control-icon-badge {
-	background: linear-gradient(135deg, rgba(15, 157, 88, 0.16), rgba(15, 157, 88, 0.28));
-}
-
-.metric-icon-symbol {
-	font-size: 28rpx;
-	font-weight: 700;
-	color: #163347;
-}
-
-.metric-value-row {
-	margin-top: 22rpx;
-	display: flex;
-	align-items: flex-end;
-	gap: 10rpx;
-	position: relative;
-	z-index: 1;
-}
-
-.metric-value {
-	font-size: 44rpx;
-	line-height: 1;
-	font-weight: 700;
-	color: #132534;
-}
-
-.metric-unit {
-	font-size: 20rpx;
-	color: #63788c;
-	padding-bottom: 6rpx;
-}
-
-.control-head {
-	margin-top: 16rpx;
-}
-
-.control-panel {
-	margin-top: 12rpx;
-	padding: 22rpx 24rpx;
-	border-radius: 24rpx;
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(241, 250, 245, 0.96));
-	box-shadow: 0 14rpx 28rpx rgba(17, 44, 61, 0.08);
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 16rpx;
-}
-
-.control-main {
-	display: flex;
-	align-items: center;
-	gap: 16rpx;
-}
-
-.control-copy {
-	display: flex;
+.control-value-row {
+	width: 100%;
 	flex-direction: column;
+	align-items: center;
 	gap: 8rpx;
 }
 
-.control-title {
-	font-size: 28rpx;
-	font-weight: 700;
-	color: #163347;
+.led-switch {
+	transform: scale(0.82);
+	transform-origin: center;
 }
 
-.control-subtitle {
-	font-size: 20rpx;
-	color: #6e8174;
+.status-grid {
+	margin-top: 16rpx;
+	display: flex;
+	gap: 16rpx;
 }
 
-.control-state {
-	color: #7a8894;
-	font-weight: 600;
+.status-card {
+	flex: 1;
+	min-height: 82rpx;
+	padding: 14rpx 18rpx;
+	border: 1rpx solid rgba(22, 31, 40, 0.08);
+	border-radius: 18rpx;
+	background: rgba(255, 255, 255, 0.94);
+	box-shadow: 0 8rpx 18rpx rgba(24, 34, 45, 0.08);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 8rpx;
 }
 
-.control-state.active {
-	color: #0f9d58;
+.status-label {
+	font-size: 18rpx;
+	font-weight: 500;
+	color: #66717d;
+}
+
+.status-text {
+	font-size: 24rpx;
+	font-weight: 800;
+	color: #4f5b66;
+}
+
+.status-text.online {
+	color: #11823b;
+}
+
+.status-text.error {
+	color: #e01818;
+}
+
+.tone-blue {
+	color: #1264c8;
+}
+
+.tone-green {
+	color: #11823b;
+}
+
+.tone-orange {
+	color: #f28a00;
+}
+
+.tone-red {
+	color: #e01818;
+}
+
+.tone-purple {
+	color: #673ab7;
+}
+
+.tone-gray {
+	color: #536170;
 }
 
 .error-box {
-	margin-top: 16rpx;
-	padding: 18rpx 20rpx;
+	margin-top: 18rpx;
+	padding: 18rpx 22rpx;
 	border-radius: 20rpx;
 	background: rgba(209, 63, 63, 0.08);
 	display: flex;
@@ -609,24 +508,41 @@ export default {
 
 @media (max-width: 560px) {
 	.page {
-		padding: 16rpx;
+		padding: 12rpx;
 	}
 
-	.hero-title {
-		font-size: 38rpx;
+	.title-main {
+		font-size: 32rpx;
 	}
 
-	.metric-card {
-		min-height: 174rpx;
-		padding: 18rpx;
+	.title-sub {
+		font-size: 20rpx;
 	}
 
-	.metric-value {
-		font-size: 38rpx;
+	.card-grid {
+		gap: 12rpx;
 	}
 
-	.control-panel {
-		padding: 20rpx;
+	.dashboard-card {
+		min-height: 226rpx;
+		padding: 14rpx 18rpx 16rpx;
+	}
+
+	.card-icon {
+		width: 148rpx;
+		height: 116rpx;
+	}
+
+	.card-label {
+		font-size: 20rpx;
+	}
+
+	.card-value {
+		font-size: 32rpx;
+	}
+
+	.card-unit {
+		font-size: 17rpx;
 	}
 }
 </style>
