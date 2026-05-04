@@ -15,14 +15,14 @@
 #define MQTT_SERVER_IP					"mqtts.heclouds.com"
 #define MQTT_SERVER_PORT				1883
 
-#define DEVICE_NAME							"device1"
-#define PRODUCT_ID							"Roh7b244ZQ"
-#define TOKEN										"version=2018-10-31&res=products%2FRoh7b244ZQ%2Fdevices%2Fdevice1&et=1806304980&method=md5&sign=qn35a42%2BXjkg2dKa70b8aQ%3D%3D"
+#define DEVICE_NAME							"stm32-esp32c3"
+#define PRODUCT_ID							"45Z51DlJn3"
+#define TOKEN										"version=2018-10-31&res=products%2F45Z51DlJn3%2Fdevices%2Fstm32-esp32c3&et=1809399480&method=md5&sign=QAfZy6%2F2oq090K%2B043BVrA%3D%3D"
 
-#define MQTT_TOPIC_POST					"$sys/Roh7b244ZQ/device1/thing/property/post"
-#define MQTT_TOPIC_POST_REPLY		"$sys/Roh7b244ZQ/device1/thing/property/post/reply"
-#define MQTT_TOPIC_SET					"$sys/Roh7b244ZQ/device1/thing/property/set"
-#define MQTT_TOPIC_SET_REPLY		"$sys/Roh7b244ZQ/device1/thing/property/set_reply"
+#define MQTT_TOPIC_POST					"$sys/45Z51DlJn3/stm32-esp32c3/thing/property/post"
+#define MQTT_TOPIC_POST_REPLY		"$sys/45Z51DlJn3/stm32-esp32c3/thing/property/post/reply"
+#define MQTT_TOPIC_SET					"$sys/45Z51DlJn3/stm32-esp32c3/thing/property/set"
+#define MQTT_TOPIC_SET_REPLY		"$sys/45Z51DlJn3/stm32-esp32c3/thing/property/set_reply"
 
 extern osSemaphoreId_t ESP8266ReceiveSemaphoreHandle;
 extern osMessageQueueId_t ESP8266PackQueueHandle;
@@ -213,7 +213,7 @@ void StartESP8266PackTask(void *argument)
 			memcpy(publish_data->topic, MQTT_TOPIC_POST, sizeof(MQTT_TOPIC_POST));
 
 			snprintf(publish_data->payload, sizeof(publish_data->payload),
-				"{\\\"id\\\":\\\"%d\\\"\\,\\\"params\\\":{\\\"humidity\\\":{\\\"value\\\":%.1f}\\,\\\"temperature\\\":{\\\"value\\\":%.1f}\\,\\\"light\\\":{\\\"value\\\":%.2f}\\,\\\"LED\\\":{\\\"value\\\":%s}}}",
+				"{\\\"id\\\":\\\"%d\\\"\\,\\\"params\\\":{\\\"EnvironmentHumidity\\\":{\\\"value\\\":%.1f}\\,\\\"EnvironmentTemperature\\\":{\\\"value\\\":%.1f}\\,\\\"LightLux\\\":{\\\"value\\\":%.2f}\\,\\\"led\\\":{\\\"value\\\":%s}}}",
 			payload_id++, sensor_data->humi_value, sensor_data->temp_value, sensor_data->light_percentage_value, LED_IsOn(LED_ONBOARD) ? "true" : "false");
 
 			osMessageQueuePut(ESP8266SendQueueHandle, &publish_data, 0, osWaitForever);
@@ -273,11 +273,11 @@ void StartESP8266RespondTask(void *argument)
 				snprintf(publish_data->payload, sizeof(publish_data->payload), "{\\\"id\\\":\\\"%d\\\"\\,\\\"code\\\":200\\,\\\"msg\\\":\\\"success\\\"}", payload_id);
 				osMessageQueuePut(ESP8266SendQueueHandle, &publish_data, 0, osWaitForever);
 
-				if (strstr(json_start, "\"LED\":true") != NULL)
+				if (strstr(json_start, "\"led\":true") != NULL)
 				{
 					LED_On(LED_ONBOARD);
 				}
-				else if (strstr(json_start, "\"LED\":false") != NULL)
+				else if (strstr(json_start, "\"led\":false") != NULL)
 				{
 					LED_Off(LED_ONBOARD);
 				}

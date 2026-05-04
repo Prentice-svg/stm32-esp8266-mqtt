@@ -1,4 +1,5 @@
 #include "usart/bsp_usart.h"
+#include "esp8266/bsp_esp_at_port.h"
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart3;
@@ -35,7 +36,7 @@ void Debug_UART_Init(void)
 void ESP8266_UART_Init(void)
 {
   huart3.Instance = USART3;
-  huart3.Init.BaudRate = 115200;
+  huart3.Init.BaudRate = ESP_AT_UART_BAUDRATE;
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
   huart3.Init.StopBits = UART_STOPBITS_1;
   huart3.Init.Parity = UART_PARITY_NONE;

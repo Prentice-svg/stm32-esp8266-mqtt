@@ -2,6 +2,7 @@
 #define __BSP_ESP8266_H
 
 #include "main.h"
+#include "esp8266/bsp_esp_at_port.h"
 
 typedef enum
 {

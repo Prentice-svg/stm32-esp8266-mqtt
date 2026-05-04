@@ -3,9 +3,6 @@
 #include "cmsis_os2.h"
 #include "FreeRTOS.h"
 
-#define ESP8266_RST_Pin				GPIO_PIN_13
-#define ESP8266_RST_GPIO_Port	GPIOB
-
 #define UART_RX_BUFF_LEN			512
 
 extern osSemaphoreId_t ESP8266ReceiveSemaphoreHandle;
@@ -19,29 +16,33 @@ volatile bool ESP8266_PrintResponse = false;
 
 void ESP8266_GPIO_Init(void)
 {
+#if ESP_AT_USE_HARD_RESET
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(ESP8266_RST_GPIO_Port, ESP8266_RST_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(ESP_AT_RST_GPIO_PORT, ESP_AT_RST_PIN, GPIO_PIN_SET);
 
   /*Configure GPIO pins : ESP8266_RST_Pin */
-  GPIO_InitStruct.Pin = ESP8266_RST_Pin;
+  GPIO_InitStruct.Pin = ESP_AT_RST_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(ESP8266_RST_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(ESP_AT_RST_GPIO_PORT, &GPIO_InitStruct);
+#endif
 }
 
 void ESP8266_Reset(void)
 {
-	HAL_GPIO_WritePin(ESP8266_RST_GPIO_Port, ESP8266_RST_Pin, GPIO_PIN_RESET);
+#if ESP_AT_USE_HARD_RESET
+	HAL_GPIO_WritePin(ESP_AT_RST_GPIO_PORT, ESP_AT_RST_PIN, GPIO_PIN_RESET);
 	HAL_Delay(100);
 
-	HAL_GPIO_WritePin(ESP8266_RST_GPIO_Port, ESP8266_RST_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(ESP_AT_RST_GPIO_PORT, ESP_AT_RST_PIN, GPIO_PIN_SET);
 	HAL_Delay(500);
+#endif
 }
 
 void UART_StartReceive(void)
@@ -51,10 +52,10 @@ void UART_StartReceive(void)
 
 void ESP8266_Init(void)
 {
-	ESP8266_Reset();
+	ESP8266_GPIO_Init();
 	ESP8266_RX_DMA_Init();
 	ESP8266_UART_Init();
-	ESP8266_GPIO_Init();
+	ESP8266_Reset();
 	UART_StartReceive();
 }
 

@@ -34,7 +34,6 @@
 </template>
 
 <script>
-	import createCommonToken from '@/key.js'
 	export default {
 		data() {
 			return {
@@ -49,20 +48,11 @@
 
 				// API 配置
 				apiConfig: {
-					productId: 'Roh7b244ZQ',
-					deviceName: 'device1',
-					token: ''
+					productId: '45Z51DlJn3',
+					deviceName: 'stm32-esp32c3',
+					token: 'version=2018-10-31&res=products%2F45Z51DlJn3%2Fdevices%2Fstm32-esp32c3&et=1809399480&method=md5&sign=QAfZy6%2F2oq090K%2B043BVrA%3D%3D'
 				}
 			}
-		},
-		onLoad() {
-			// 生成 token
-			const params = {
-				access_key: 'LTm7Q03VJVF9w/uf0e+zWRUxZR+1FeEtx8E9a3VPyw8=',
-				version: '2022-05-01',
-				productid: this.apiConfig.productId
-			};
-			this.apiConfig.token = createCommonToken(params)
 		},
 		onShow() {
 			// 页面显示时：立即获取一次，然后开始轮询
@@ -115,10 +105,10 @@
 								return item ? item.value : '--'
 							};
 
-							this.humidity = getValue('humidity');
-							this.temperature = getValue('temperature');
-							this.light = getValue('light');
-							this.LED = (getValue('LED') === 'true')
+							this.humidity = getValue('EnvironmentHumidity');
+							this.temperature = getValue('EnvironmentTemperature');
+							this.light = getValue('LightLux');
+							this.LED = (getValue('led') === 'true')
 						}
 					},
 					fail: (err) => {
@@ -138,7 +128,7 @@
 						product_id: this.apiConfig.productId,
 						device_name: this.apiConfig.deviceName,
 						params: {
-							LED: LED_value
+							led: LED_value
 						}
 					},
 					header: {
