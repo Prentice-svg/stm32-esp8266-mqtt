@@ -28,7 +28,9 @@ export function saveSettings(settings) {
 		...defaultSettings,
 		...settings,
 		dataMode: settings.dataMode === 'onenet' ? 'onenet' : 'mock',
-		connectionStatus: settings.connectionStatus || 'untested'
+		connectionStatus: settings.connectionStatus || 'untested',
+		cameraEnabled: settings.cameraEnabled !== false,
+		cameraIp: settings.cameraIp || defaultSettings.cameraIp
 	}
 	uni.setStorageSync(SETTINGS_KEY, nextSettings)
 	return nextSettings

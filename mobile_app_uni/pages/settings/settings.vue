@@ -48,6 +48,22 @@
 			</view>
 		</SectionCard>
 
+		<SectionCard title="摄像头配置" subtitle="ESP32-S3-CAM 独立提供局域网视频流">
+			<view class="form-list">
+				<view class="camera-switch-row">
+					<view>
+						<text class="platform-label">启用摄像头</text>
+						<text class="field-help">开启后首页会显示摄像头卡片</text>
+					</view>
+					<switch :checked="form.cameraEnabled" color="#2563EB" @change="handleCameraEnabledChange" />
+				</view>
+				<SettingField label="摄像头 IP" v-model="form.cameraIp" placeholder="例如 192.168.1.120" />
+				<view class="camera-preview-row">
+					<text class="camera-url">{{ cameraUrlText }}</text>
+				</view>
+			</view>
+		</SectionCard>
+
 		<view class="actions">
 			<button class="action-btn secondary" @tap="handleTest">测试连接</button>
 			<button class="action-btn primary" @tap="handleSave">保存配置</button>
@@ -111,6 +127,12 @@ export default {
 				return '连接失败 · 请检查 Token 与设备参数'
 			}
 			return '未测试 · 当前平台 OneNet'
+		},
+		cameraUrlText() {
+			const ip = String(this.form.cameraIp || '').trim()
+			if (!ip) return '视频流地址：未配置'
+			const baseUrl = /^https?:\/\//i.test(ip) ? ip.replace(/\/$/, '') : `http://${ip}`
+			return `视频流地址：${baseUrl}/stream`
 		}
 	},
 	onShow() {
@@ -120,6 +142,9 @@ export default {
 		setDataMode(mode) {
 			this.form.dataMode = mode
 			this.form.connectionStatus = 'untested'
+		},
+		handleCameraEnabledChange(event) {
+			this.form.cameraEnabled = !!event.detail.value
 		},
 		handleTest() {
 			if (this.testing) return
@@ -239,6 +264,36 @@ export default {
 	font-weight: 750;
 	color: #0F172A;
 	box-sizing: border-box;
+}
+
+.camera-switch-row {
+	min-height: 92rpx;
+	padding: 0 4rpx;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24rpx;
+}
+
+.field-help {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 22rpx;
+	color: #94A3B8;
+}
+
+.camera-preview-row {
+	padding: 18rpx 22rpx;
+	border-radius: 20rpx;
+	background: #F8FAFC;
+	border: 1rpx solid #E2E8F0;
+}
+
+.camera-url {
+	font-size: 22rpx;
+	line-height: 1.45;
+	color: #64748B;
+	word-break: break-all;
 }
 
 .mode-tabs {

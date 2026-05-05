@@ -39,6 +39,8 @@
 			<text class="error-text">{{ errorMessage }}</text>
 		</view>
 
+		<CameraCard :enabled="settings.cameraEnabled" :camera-ip="settings.cameraIp" />
+
 		<AppTabBar active="monitor" />
 	</view>
 </template>
@@ -46,6 +48,7 @@
 <script>
 import AppHeader from '../../components/AppHeader.vue'
 import AppTabBar from '../../components/AppTabBar.vue'
+import CameraCard from '../../components/CameraCard.vue'
 import SensorCard from '../../components/SensorCard.vue'
 import { loadSettings } from '../../utils/storage.js'
 import {
@@ -60,6 +63,7 @@ export default {
 	components: {
 		AppHeader,
 		AppTabBar,
+		CameraCard,
 		SensorCard
 	},
 	data() {
