@@ -22,6 +22,13 @@ const PROPERTY_MAP = {
 	}
 }
 
+const UNIT_MAP = sensorList.reduce((result, item) => {
+	result[item.key] = item.unit || ''
+	return result
+}, {
+	led: ''
+})
+
 function getBaseUrl(settings) {
 	const host = (settings && settings.serverHost) || 'iot-api.heclouds.com'
 	if (/^https?:\/\//.test(host)) {
@@ -53,6 +60,21 @@ function formatMetric(value, precision) {
 	if (value === null || value === undefined || value === '') return '--'
 	const numericValue = Number(normalizeValue(value))
 	return Number.isFinite(numericValue) ? numericValue.toFixed(precision) : String(value)
+}
+
+function formatTime(timestamp) {
+	const date = new Date(Number(timestamp))
+	if (!Number.isFinite(date.getTime())) return '--'
+	const pad = (value) => String(value).padStart(2, '0')
+	return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
+
+function getNumericLevel(value) {
+	const numericValue = Number.parseFloat(String(value).replace(/[^\d.-]/g, ''))
+	if (!Number.isFinite(numericValue)) {
+		return parseBoolean(value) ? 82 : 28
+	}
+	return Math.max(12, Math.min(88, numericValue))
 }
 
 function request(settings, options) {
@@ -148,6 +170,55 @@ export function setDeviceProperty(settings, params) {
 			params
 		}
 	})
+}
+
+export function queryPropertyHistory(settings, identifier, range = {}) {
+	validateSettings(settings)
+	return request(settings, {
+		// OneNet 历史属性真实 API 路径以控制台文档为准；这里保留适配入口。
+		// 如果控制台接口参数与此处不同，只需要调整这一层，历史页无需改动。
+		path: '/thingmodel/query-device-property-history',
+		method: 'GET',
+		data: {
+			product_id: settings.productId,
+			device_name: getDeviceName(settings),
+			identifier,
+			start_time: range.startTime || '',
+			end_time: range.endTime || ''
+		}
+	}).then((body) => {
+		if (body.data && Array.isArray(body.data.list)) {
+			return body.data.list
+		}
+		if (Array.isArray(body.data)) {
+			return body.data
+		}
+		return []
+	})
+}
+
+export function getPropertyIdentifier(key) {
+	return PROPERTY_MAP[key] ? PROPERTY_MAP[key].identifier : ''
+}
+
+export function buildHistoryRows(key, rows) {
+	const config = PROPERTY_MAP[key]
+	const unit = UNIT_MAP[key] || ''
+	return rows
+		.slice()
+		.reverse()
+		.map((row) => {
+			const rawValue = normalizeValue(row.value)
+			const displayValue = key === 'led'
+				? (parseBoolean(rawValue) ? '开启' : '关闭')
+				: formatMetric(rawValue, config ? config.precision : 1)
+			return {
+				time: formatTime(row.time),
+				value: unit ? `${displayValue} ${unit}` : displayValue,
+				status: '正常',
+				level: getNumericLevel(rawValue)
+			}
+		})
 }
 
 export function buildMockMonitorData() {

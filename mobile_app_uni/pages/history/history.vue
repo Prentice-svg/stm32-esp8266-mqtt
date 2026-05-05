@@ -9,7 +9,7 @@
 					:key="point.key"
 					class="point-row"
 					:class="{ active: activeKey === point.key }"
-					@tap="activeKey = point.key"
+					@tap="selectPoint(point.key)"
 				>
 					<view class="point-icon">
 						<image v-if="point.iconPath" class="point-icon-img" :src="point.iconPath" mode="aspectFit" />
@@ -24,7 +24,7 @@
 			</view>
 		</SectionCard>
 
-		<SectionCard :title="activePoint.label + '趋势'" subtitle="最近记录">
+		<SectionCard :title="activePoint.label + '趋势'" :subtitle="historySubtitle">
 			<template #action>
 				<view class="period-tabs">
 					<text
@@ -32,7 +32,7 @@
 						:key="item"
 						class="period-tab"
 						:class="{ active: period === item }"
-						@tap="period = item"
+						@tap="selectPeriod(item)"
 					>
 						{{ item }}
 					</text>
@@ -56,6 +56,9 @@
 					<text class="summary-label">当前</text>
 					<text class="summary-value">{{ latestRow.value }}</text>
 				</view>
+			</view>
+			<view v-if="historyError" class="history-error">
+				<text>{{ historyError }}</text>
 			</view>
 		</SectionCard>
 
@@ -85,6 +88,9 @@ import AppTabBar from '../../components/AppTabBar.vue'
 import SectionCard from '../../components/SectionCard.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import { monitorPoints, historyMap } from '../../utils/mockData.js'
+import { loadHistoryMap } from '../../utils/history.js'
+import { loadSettings } from '../../utils/storage.js'
+import { buildHistoryRows, getPropertyIdentifier, queryPropertyHistory } from '../../utils/onenet.js'
 
 export default {
 	components: {
@@ -95,23 +101,96 @@ export default {
 	},
 	data() {
 		return {
+			settings: loadSettings(),
 			points: monitorPoints,
+			localHistory: {},
+			remoteRows: [],
+			historyError: '',
+			loadingHistory: false,
 			activeKey: 'temperature',
 			period: '日',
 			periods: ['日', '周', '月']
 		}
+	},
+	onShow() {
+		this.settings = loadSettings()
+		this.localHistory = loadHistoryMap(false)
+		this.loadRemoteHistory()
 	},
 	computed: {
 		activePoint() {
 			return this.points.find((item) => item.key === this.activeKey) || this.points[0]
 		},
 		activeRows() {
-			return historyMap[this.activeKey] || []
+			if (this.remoteRows.length) {
+				return this.remoteRows
+			}
+			const rows = this.localHistory[this.activeKey] || []
+			return rows.length ? rows : (historyMap[this.activeKey] || [])
+		},
+		hasRemoteRows() {
+			return this.remoteRows.length > 0
+		},
+		hasLocalRows() {
+			return Boolean(this.localHistory[this.activeKey] && this.localHistory[this.activeKey].length)
+		},
+		historySubtitle() {
+			if (this.loadingHistory) return '正在读取 OneNet 历史'
+			if (this.hasRemoteRows) return 'OneNet 历史记录'
+			return this.hasLocalRows ? '本地真实记录' : '暂无真实记录，显示示例数据'
 		},
 		latestRow() {
 			return this.activeRows[this.activeRows.length - 1] || {
 				value: '--'
 			}
+		}
+	},
+	methods: {
+		selectPoint(key) {
+			if (this.activeKey === key) return
+			this.activeKey = key
+			this.loadRemoteHistory()
+		},
+		selectPeriod(period) {
+			if (this.period === period) return
+			this.period = period
+			this.loadRemoteHistory()
+		},
+		getRange() {
+			const endTime = Date.now()
+			const durationMap = {
+				日: 24 * 60 * 60 * 1000,
+				周: 7 * 24 * 60 * 60 * 1000,
+				月: 30 * 24 * 60 * 60 * 1000
+			}
+			return {
+				startTime: endTime - (durationMap[this.period] || durationMap.日),
+				endTime
+			}
+		},
+		loadRemoteHistory() {
+			this.remoteRows = []
+			this.historyError = ''
+
+			if (!this.settings || this.settings.dataMode !== 'onenet') {
+				return
+			}
+
+			const identifier = getPropertyIdentifier(this.activeKey)
+			if (!identifier) return
+
+			this.loadingHistory = true
+			queryPropertyHistory(this.settings, identifier, this.getRange())
+				.then((rows) => {
+					this.remoteRows = buildHistoryRows(this.activeKey, rows).slice(-24)
+					this.loadingHistory = false
+				})
+				.catch((error) => {
+					this.historyError = error && error.message
+						? `OneNet 历史读取失败，已显示本地记录：${error.message}`
+						: 'OneNet 历史读取失败，已显示本地记录。'
+					this.loadingHistory = false
+				})
 		}
 	}
 }
@@ -300,6 +379,16 @@ export default {
 	display: flex;
 	align-items: baseline;
 	gap: 8rpx;
+}
+
+.history-error {
+	margin-top: 16rpx;
+	padding: 16rpx 18rpx;
+	border-radius: 20rpx;
+	background: rgba(245, 158, 11, 0.1);
+	color: #B45309;
+	font-size: 22rpx;
+	line-height: 1.45;
 }
 
 .summary-label {

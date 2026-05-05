@@ -1,4 +1,5 @@
 #include "oled/bsp_i2c_oled.h"
+#include "led/bsp_led.h"
 #include "types/app_screen_type.h"
 #include "types/app_sensor_data.h"
 #include "cmsis_os2.h"
@@ -11,12 +12,6 @@ static void OLED_DrawHeader(const char *title)
 {
 	OLED_ShowString(0, 0, (char *)title, OLED_8X16);
 	OLED_DrawLine(0, 15, 127, 15);
-}
-
-static void OLED_DrawFooter(const char *text)
-{
-	OLED_DrawLine(0, 55, 127, 55);
-	OLED_ShowString(0, 56, (char *)text, OLED_6X8);
 }
 
 static uint8_t OLED_ClampPercent(float value)
@@ -37,20 +32,21 @@ static uint8_t OLED_ClampPercent(float value)
 static void OLED_DisplayOverview(void)
 {
 	OLED_DrawHeader("P1 OVERVIEW");
+	OLED_Printf(92, 4, OLED_6X8, "LED%s", LED_IsOn(LED_ONBOARD) ? "ON" : "OFF");
 
 	if (global_display_data.dht11_check_result == DHT11_DATA_OK)
 	{
-		OLED_Printf(0, 19, OLED_6X8, "TEMP  %5.1f C", global_display_data.temp_value);
-		OLED_Printf(0, 29, OLED_6X8, "HUMI  %5.1f %%", global_display_data.humi_value);
-		OLED_Printf(0, 39, OLED_6X8, "PRES %7.2f", global_display_data.pressure_hpa);
+		OLED_Printf(0, 18, OLED_6X8, "TEMP %5.1fC", global_display_data.temp_value);
+		OLED_Printf(0, 27, OLED_6X8, "HUMI %5.1f%%", global_display_data.humi_value);
+		OLED_Printf(0, 36, OLED_6X8, "PRES %6.1fhPa", global_display_data.pressure_hpa);
 	}
 	else
 	{
-		OLED_ShowString(0, 22, "AHT20/BMP ERROR", OLED_6X8);
+		OLED_ShowString(0, 24, "AHT20/BMP ERROR", OLED_6X8);
 	}
 
-	OLED_Printf(0, 49, OLED_6X8, "LIGHT %5.1f %%", global_display_data.light_percentage_value);
-	OLED_DrawFooter("K1 NEXT   K2 LED");
+	OLED_Printf(0, 45, OLED_6X8, "LIGHT %5.1f%%", global_display_data.light_percentage_value);
+	OLED_ShowString(0, 56, "K1:NEXT K2:LED", OLED_6X8);
 }
 
 static void OLED_DisplayTempHumi(void)

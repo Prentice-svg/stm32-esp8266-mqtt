@@ -54,6 +54,7 @@ import {
 	queryDeviceProperties,
 	setDeviceProperty
 } from '../../utils/onenet.js'
+import { appendHistorySnapshot } from '../../utils/history.js'
 
 export default {
 	components: {
@@ -90,6 +91,12 @@ export default {
 			this.sensors = data.sensors
 			this.ledOn = data.ledOn
 			this.errorMessage = data.errorMessage || ''
+			if (this.settings.dataMode === 'onenet' && !this.errorMessage) {
+				appendHistorySnapshot({
+					sensors: this.sensors,
+					ledOn: this.ledOn
+				})
+			}
 		},
 		loadMonitorData() {
 			if (this.settings.dataMode !== 'onenet') {
@@ -123,6 +130,10 @@ export default {
 					uni.showToast({
 						title: `LED 已${value ? '开启' : '关闭'}`,
 						icon: 'none'
+					})
+					appendHistorySnapshot({
+						sensors: this.sensors,
+						ledOn: this.ledOn
 					})
 					this.ledSubmitting = false
 				})
