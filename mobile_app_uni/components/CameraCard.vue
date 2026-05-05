@@ -13,23 +13,31 @@
 
 		<view class="camera-view">
 			<image
-				v-if="snapshotUrl"
+				v-if="activeSnapshotUrl"
 				class="camera-image active"
-				:src="snapshotUrl"
+				:src="activeSnapshotUrl"
 				mode="aspectFill"
 				@error="handleImageError"
 			/>
-			<view v-else class="camera-placeholder">
+			<image
+				v-if="nextSnapshotUrl"
+				class="camera-image preload"
+				:src="nextSnapshotUrl"
+				mode="aspectFill"
+				@load="handlePreloadReady"
+				@error="handleImageError"
+			/>
+			<view v-if="!activeSnapshotUrl && !nextSnapshotUrl" class="camera-placeholder">
 				<image class="placeholder-icon" src="/static/icons/camera_status_system_d.png" mode="aspectFit" />
 				<text class="placeholder-title">摄像头未打开</text>
-				<text class="placeholder-text">点开始进入连续监控页面</text>
+				<text class="placeholder-text">点开始在首页预览画面</text>
 			</view>
 		</view>
 
 		<view class="camera-actions">
 			<button class="camera-btn primary" @tap="toggleStream">
-				<text class="btn-dot"></text>
-				<text>开始</text>
+				<text class="btn-dot" :class="{ stop: isStreaming }"></text>
+				<text>{{ isStreaming ? '停止' : '开始' }}</text>
 			</button>
 			<button class="camera-btn secondary" @tap="captureSnapshot">
 				<text>📷</text>
@@ -60,8 +68,11 @@ export default {
 		return {
 			isStreaming: false,
 			snapshotVersion: 0,
-			snapshotUrl: '',
-			errorNoticeShown: false
+			activeSnapshotUrl: '',
+			nextSnapshotUrl: '',
+			errorNoticeShown: false,
+			previewTimer: null,
+			loadingSnapshot: false
 		}
 	},
 	computed: {
@@ -107,18 +118,45 @@ export default {
 	methods: {
 		toggleStream() {
 			if (!this.ensureReady()) return
-			uni.navigateTo({
-				url: `/pages/camera/camera?url=${encodeURIComponent(this.baseUrl)}`
-			})
+			if (this.isStreaming) {
+				this.stopPreview()
+			} else {
+				this.startPreview()
+			}
 		},
 		resetPreview() {
-			this.isStreaming = false
-			this.snapshotUrl = ''
+			this.stopPreview()
+			this.activeSnapshotUrl = ''
+			this.nextSnapshotUrl = ''
 			this.errorNoticeShown = false
 		},
 		refreshSnapshot() {
+			if (!this.baseUrl || this.loadingSnapshot) return
+			this.loadingSnapshot = true
 			this.snapshotVersion += 1
-			this.snapshotUrl = this.captureUrl
+			this.nextSnapshotUrl = this.captureUrl
+		},
+		startPreview() {
+			this.isStreaming = true
+			this.errorNoticeShown = false
+			this.refreshSnapshot()
+			this.previewTimer = setInterval(() => {
+				this.refreshSnapshot()
+			}, 700)
+		},
+		stopPreview() {
+			if (this.previewTimer) {
+				clearInterval(this.previewTimer)
+				this.previewTimer = null
+			}
+			this.isStreaming = false
+			this.loadingSnapshot = false
+		},
+		handlePreloadReady() {
+			this.activeSnapshotUrl = this.nextSnapshotUrl
+			this.nextSnapshotUrl = ''
+			this.loadingSnapshot = false
+			this.errorNoticeShown = false
 		},
 		captureSnapshot() {
 			if (!this.ensureReady()) return
@@ -148,6 +186,8 @@ export default {
 			return true
 		},
 		handleImageError() {
+			this.nextSnapshotUrl = ''
+			this.loadingSnapshot = false
 			if (this.errorNoticeShown) return
 			this.errorNoticeShown = true
 			uni.showToast({
@@ -243,6 +283,11 @@ export default {
 
 .camera-image.active {
 	opacity: 1;
+}
+
+.camera-image.preload {
+	opacity: 0;
+	pointer-events: none;
 }
 
 .camera-placeholder {
