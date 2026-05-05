@@ -13,13 +13,21 @@
 
 		<view class="camera-view">
 			<image
-				v-if="displayUrl"
+				v-if="visibleUrl"
 				class="camera-image"
-				:src="displayUrl"
+				:src="visibleUrl"
 				mode="aspectFill"
 				@error="handleImageError"
 			/>
-			<view v-else class="camera-placeholder">
+			<image
+				v-if="pendingUrl"
+				class="camera-image preload"
+				:src="pendingUrl"
+				mode="aspectFill"
+				@load="handlePendingLoaded"
+				@error="handlePendingError"
+			/>
+			<view v-if="!visibleUrl" class="camera-placeholder">
 				<image class="placeholder-icon" src="/static/icons/camera_status_system_d.png" mode="aspectFit" />
 				<text class="placeholder-title">未开始预览</text>
 				<text class="placeholder-text">在设置页填写 ESP32-S3-CAM IP 后启动</text>
@@ -61,7 +69,11 @@ export default {
 			isStreaming: false,
 			snapshotVersion: 0,
 			lastMode: 'idle',
-			snapshotTimer: null
+			snapshotTimer: null,
+			visibleUrl: '',
+			pendingUrl: '',
+			frameLoading: false,
+			errorNoticeShown: false
 		}
 	},
 	computed: {
@@ -82,11 +94,6 @@ export default {
 			if (!this.baseUrl) return ''
 			return `${this.baseUrl}/capture?t=${this.snapshotVersion}`
 		},
-		displayUrl() {
-			if (!this.enabled || !this.baseUrl) return ''
-			if (this.isStreaming || this.lastMode === 'capture') return this.captureUrl
-			return ''
-		},
 		subtitle() {
 			if (!this.enabled) return '未启用'
 			if (!this.baseUrl) return '未配置 IP'
@@ -95,12 +102,11 @@ export default {
 	},
 	watch: {
 		cameraIp() {
-			this.isStreaming = false
-			this.lastMode = 'idle'
+			this.resetPreview()
 		},
 		enabled(value) {
 			if (!value) {
-				this.stopStream()
+				this.resetPreview()
 			}
 		}
 	},
@@ -123,10 +129,11 @@ export default {
 			this.stopStream()
 			this.isStreaming = true
 			this.lastMode = 'stream'
+			this.errorNoticeShown = false
 			this.refreshSnapshot()
 			this.snapshotTimer = setInterval(() => {
 				this.refreshSnapshot()
-			}, 700)
+			}, 360)
 		},
 		stopStream() {
 			if (this.snapshotTimer) {
@@ -136,14 +143,34 @@ export default {
 			this.isStreaming = false
 			this.lastMode = 'idle'
 		},
+		resetPreview() {
+			this.stopStream()
+			this.visibleUrl = ''
+			this.pendingUrl = ''
+			this.frameLoading = false
+			this.errorNoticeShown = false
+		},
 		refreshSnapshot() {
+			if (this.frameLoading || !this.baseUrl) return
 			this.snapshotVersion += 1
+			this.frameLoading = true
+			this.pendingUrl = this.captureUrl
 		},
 		captureSnapshot() {
 			if (!this.ensureReady()) return
 			this.stopStream()
 			this.refreshSnapshot()
 			this.lastMode = 'capture'
+		},
+		handlePendingLoaded() {
+			this.visibleUrl = this.pendingUrl
+			this.pendingUrl = ''
+			this.frameLoading = false
+		},
+		handlePendingError() {
+			this.pendingUrl = ''
+			this.frameLoading = false
+			this.handleImageError()
 		},
 		openCameraPage() {
 			if (!this.ensureReady()) return
@@ -173,6 +200,8 @@ export default {
 			return true
 		},
 		handleImageError() {
+			if (this.errorNoticeShown) return
+			this.errorNoticeShown = true
 			uni.showToast({
 				title: '摄像头画面加载失败',
 				icon: 'none'
@@ -256,6 +285,15 @@ export default {
 	height: 100%;
 	display: block;
 	background: #0F172A;
+}
+
+.camera-image.preload {
+	position: absolute;
+	left: -9999rpx;
+	top: -9999rpx;
+	width: 1rpx;
+	height: 1rpx;
+	opacity: 0;
 }
 
 .camera-placeholder {
