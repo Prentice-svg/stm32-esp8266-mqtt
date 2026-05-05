@@ -60,7 +60,8 @@ export default {
 		return {
 			isStreaming: false,
 			snapshotVersion: 0,
-			lastMode: 'idle'
+			lastMode: 'idle',
+			snapshotTimer: null
 		}
 	},
 	computed: {
@@ -83,8 +84,7 @@ export default {
 		},
 		displayUrl() {
 			if (!this.enabled || !this.baseUrl) return ''
-			if (this.isStreaming) return this.streamUrl
-			if (this.lastMode === 'capture') return this.captureUrl
+			if (this.isStreaming || this.lastMode === 'capture') return this.captureUrl
 			return ''
 		},
 		subtitle() {
@@ -100,21 +100,49 @@ export default {
 		},
 		enabled(value) {
 			if (!value) {
-				this.isStreaming = false
-				this.lastMode = 'idle'
+				this.stopStream()
 			}
 		}
+	},
+	beforeDestroy() {
+		this.stopStream()
+	},
+	beforeUnmount() {
+		this.stopStream()
 	},
 	methods: {
 		toggleStream() {
 			if (!this.ensureReady()) return
-			this.isStreaming = !this.isStreaming
-			this.lastMode = this.isStreaming ? 'stream' : 'idle'
+			if (this.isStreaming) {
+				this.stopStream()
+			} else {
+				this.startStream()
+			}
+		},
+		startStream() {
+			this.stopStream()
+			this.isStreaming = true
+			this.lastMode = 'stream'
+			this.refreshSnapshot()
+			this.snapshotTimer = setInterval(() => {
+				this.refreshSnapshot()
+			}, 700)
+		},
+		stopStream() {
+			if (this.snapshotTimer) {
+				clearInterval(this.snapshotTimer)
+				this.snapshotTimer = null
+			}
+			this.isStreaming = false
+			this.lastMode = 'idle'
+		},
+		refreshSnapshot() {
+			this.snapshotVersion += 1
 		},
 		captureSnapshot() {
 			if (!this.ensureReady()) return
-			this.isStreaming = false
-			this.snapshotVersion += 1
+			this.stopStream()
+			this.refreshSnapshot()
 			this.lastMode = 'capture'
 		},
 		openCameraPage() {
