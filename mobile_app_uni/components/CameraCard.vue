@@ -13,21 +13,24 @@
 
 		<view class="camera-view">
 			<image
-				v-if="visibleUrl"
+				v-if="frameUrls[0]"
 				class="camera-image"
-				:src="visibleUrl"
+				:class="{ active: activeFrameIndex === 0 }"
+				:src="frameUrls[0]"
 				mode="aspectFill"
-				@error="handleImageError"
+				@load="handleFrameLoaded(0)"
+				@error="handleFrameError(0)"
 			/>
 			<image
-				v-if="pendingUrl"
-				class="camera-image preload"
-				:src="pendingUrl"
+				v-if="frameUrls[1]"
+				class="camera-image"
+				:class="{ active: activeFrameIndex === 1 }"
+				:src="frameUrls[1]"
 				mode="aspectFill"
-				@load="handlePendingLoaded"
-				@error="handlePendingError"
+				@load="handleFrameLoaded(1)"
+				@error="handleFrameError(1)"
 			/>
-			<view v-if="!visibleUrl" class="camera-placeholder">
+			<view v-if="activeFrameIndex < 0" class="camera-placeholder">
 				<image class="placeholder-icon" src="/static/icons/camera_status_system_d.png" mode="aspectFit" />
 				<text class="placeholder-title">未开始预览</text>
 				<text class="placeholder-text">在设置页填写 ESP32-S3-CAM IP 后启动</text>
@@ -70,8 +73,9 @@ export default {
 			snapshotVersion: 0,
 			lastMode: 'idle',
 			snapshotTimer: null,
-			visibleUrl: '',
-			pendingUrl: '',
+			frameUrls: ['', ''],
+			activeFrameIndex: -1,
+			pendingFrameIndex: -1,
 			frameLoading: false,
 			errorNoticeShown: false
 		}
@@ -145,8 +149,9 @@ export default {
 		},
 		resetPreview() {
 			this.stopStream()
-			this.visibleUrl = ''
-			this.pendingUrl = ''
+			this.frameUrls = ['', '']
+			this.activeFrameIndex = -1
+			this.pendingFrameIndex = -1
 			this.frameLoading = false
 			this.errorNoticeShown = false
 		},
@@ -154,7 +159,9 @@ export default {
 			if (this.frameLoading || !this.baseUrl) return
 			this.snapshotVersion += 1
 			this.frameLoading = true
-			this.pendingUrl = this.captureUrl
+			const nextIndex = this.activeFrameIndex === 0 ? 1 : 0
+			this.pendingFrameIndex = nextIndex
+			this.frameUrls.splice(nextIndex, 1, this.captureUrl)
 		},
 		captureSnapshot() {
 			if (!this.ensureReady()) return
@@ -162,13 +169,16 @@ export default {
 			this.refreshSnapshot()
 			this.lastMode = 'capture'
 		},
-		handlePendingLoaded() {
-			this.visibleUrl = this.pendingUrl
-			this.pendingUrl = ''
+		handleFrameLoaded(index) {
+			if (index !== this.pendingFrameIndex) return
+			this.activeFrameIndex = index
+			this.pendingFrameIndex = -1
 			this.frameLoading = false
 		},
-		handlePendingError() {
-			this.pendingUrl = ''
+		handleFrameError(index) {
+			if (index === this.pendingFrameIndex) {
+				this.pendingFrameIndex = -1
+			}
 			this.frameLoading = false
 			this.handleImageError()
 		},
@@ -281,19 +291,21 @@ export default {
 }
 
 .camera-image {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
 	width: 100%;
 	height: 100%;
 	display: block;
 	background: #0F172A;
+	opacity: 0;
+	transition: opacity 120ms linear;
 }
 
-.camera-image.preload {
-	position: absolute;
-	left: -9999rpx;
-	top: -9999rpx;
-	width: 1rpx;
-	height: 1rpx;
-	opacity: 0;
+.camera-image.active {
+	opacity: 1;
 }
 
 .camera-placeholder {
