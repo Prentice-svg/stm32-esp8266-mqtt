@@ -1,0 +1,27 @@
+{
+  "name": "STM32F103 ESP32-C3 AT baseline firmware",
+  "target_chip": "esp32c3",
+  "module": "ESP32-C3 Super Mini / ESP32-C3-MINI-1",
+  "esp_at_package": "ESP32-C3-MINI-1-AT-V4.1.1.0",
+  "esp_at_version": "v4.1.1.0",
+  "source_url": "https://dl.espressif.com/esp-at/firmwares/esp32c3/ESP32-C3-MINI-1-AT-V4.1.1.0.zip",
+  "official_reference": "https://docs.espressif.com/projects/esp-at/en/latest/esp32c3/AT_Binary_Lists/esp_at_binaries.html",
+  "zip_file": "ESP32-C3-MINI-1-AT-V4.1.1.0.zip",
+  "zip_sha256": "FB052810FDDCA3C9C512F5071F11BC17E4977DF18B1DF61AF3922A428404C2B2",
+  "firmware_payload_dir": "ESP32-C3-MINI-1-AT-V4.1.1.0/ESP32-C3-MINI-1-AT-V4.1.1.0/ESP32-C3-MINI-1-AT-V4.1.1.0",
+  "flasher_args": "flasher_args.json",
+  "download_config": "download.config",
+  "at_uart": {
+    "baudrate": 115200,
+    "tx_pin": "GPIO7",
+    "rx_pin": "GPIO6",
+    "stm32_tx": "PB10 / USART3_TX",
+    "stm32_rx": "PB11 / USART3_RX"
+  },
+  "validated_stm32_baseline": {
+    "mcu": "STM32F103C8T6",
+    "uart": "USART3",
+    "mqtt_publish": "AT+MQTTPUBRAW",
+    "onenet_identifiers": ["Humi", "Temp", "Light", "Press", "led"]
+  }
+}

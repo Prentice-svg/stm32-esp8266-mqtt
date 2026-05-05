@@ -10,3 +10,9 @@
 **/Objects/
 **/Listings/
 **/DebugConfig/
+
+# ESP32-C3 AT flasher local build artifacts
+baseline/esp32c3_at/tools/flasher/.venv-build/
+baseline/esp32c3_at/tools/flasher/build/
+baseline/esp32c3_at/tools/flasher/*.spec
+baseline/esp32c3_at/release/logs/
