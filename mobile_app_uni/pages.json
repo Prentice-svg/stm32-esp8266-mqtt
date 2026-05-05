@@ -1,17 +1,32 @@
 {
 	"pages": [
 		{
-			"path": "pages/index/index",
+			"path": "pages/monitor/monitor",
 			"style": {
-				"navigationBarTitleText": "环境监测终端"
+				"navigationBarTitleText": "监测",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/history/history",
+			"style": {
+				"navigationBarTitleText": "历史",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/settings/settings",
+			"style": {
+				"navigationBarTitleText": "设置",
+				"navigationStyle": "custom"
 			}
 		}
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "环境监测终端",
-		"navigationBarBackgroundColor": "#EEF5F0",
-		"backgroundColor": "#EEF5F0"
+		"navigationBarTitleText": "物联网控制系统",
+		"navigationBarBackgroundColor": "#F6F9FC",
+		"backgroundColor": "#F6F9FC"
 	},
 	"uniIdRouter": {}
 }
