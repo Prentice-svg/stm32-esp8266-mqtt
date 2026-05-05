@@ -98,5 +98,5 @@ export const defaultSettings = {
 	token: 'version=2018-10-31&res=products%2F45Z51DlJn3%2Fdevices%2Fstm32-esp32c3&et=1809399480&method=md5&sign=QAfZy6%2F2oq090K%2B043BVrA%3D%3D',
 	deviceId: 'stm32-esp32c3',
 	serverHost: 'iot-api.heclouds.com',
-	reportInterval: '60'
+	reportInterval: '5'
 }

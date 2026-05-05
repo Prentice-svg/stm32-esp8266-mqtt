@@ -4,7 +4,8 @@
 			"path": "pages/monitor/monitor",
 			"style": {
 				"navigationBarTitleText": "监测",
-				"navigationStyle": "custom"
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true
 			}
 		},
 		{

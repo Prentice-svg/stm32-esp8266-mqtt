@@ -68,13 +68,16 @@ export default {
 			settings: loadSettings(),
 			sensors: mockData.sensors,
 			ledOn: mockData.ledOn,
+			loading: false,
 			ledSubmitting: false,
-			errorMessage: ''
+			errorMessage: '',
+			pollingTimer: null
 		}
 	},
 	computed: {
 		deviceStateText() {
 			if (this.errorMessage) return '连接失败'
+			if (this.loading) return '同步中'
 			return this.settings.dataMode === 'onenet' ? '设备在线' : 'Mock 模式'
 		},
 		ledStatus() {
@@ -85,11 +88,23 @@ export default {
 	onShow() {
 		this.settings = loadSettings()
 		this.loadMonitorData()
+		this.startPolling()
+	},
+	onHide() {
+		this.stopPolling()
+	},
+	onUnload() {
+		this.stopPolling()
+	},
+	onPullDownRefresh() {
+		this.loadMonitorData(true)
 	},
 	methods: {
 		applyMonitorData(data) {
 			this.sensors = data.sensors
-			this.ledOn = data.ledOn
+			if (!this.ledSubmitting) {
+				this.ledOn = data.ledOn
+			}
 			this.errorMessage = data.errorMessage || ''
 			if (this.settings.dataMode === 'onenet' && !this.errorMessage) {
 				appendHistorySnapshot({
@@ -98,19 +113,48 @@ export default {
 				})
 			}
 		},
-		loadMonitorData() {
-			if (this.settings.dataMode !== 'onenet') {
-				this.applyMonitorData(buildMockMonitorData())
+		getPollingIntervalMs() {
+			const seconds = Number(this.settings.reportInterval)
+			const safeSeconds = Number.isFinite(seconds) && seconds > 0 ? seconds : 5
+			return Math.max(3000, Math.min(safeSeconds * 1000, 5000))
+		},
+		startPolling() {
+			this.stopPolling()
+			this.pollingTimer = setInterval(() => {
+				this.loadMonitorData()
+			}, this.getPollingIntervalMs())
+		},
+		stopPolling() {
+			if (this.pollingTimer) {
+				clearInterval(this.pollingTimer)
+				this.pollingTimer = null
+			}
+		},
+		loadMonitorData(isManual = false) {
+			if (this.loading) {
+				if (isManual) uni.stopPullDownRefresh()
 				return
 			}
 
+			if (this.settings.dataMode !== 'onenet') {
+				this.applyMonitorData(buildMockMonitorData())
+				if (isManual) uni.stopPullDownRefresh()
+				return
+			}
+
+			this.loading = true
 			this.errorMessage = ''
-			queryDeviceProperties(this.settings)
+			Promise.resolve()
+				.then(() => queryDeviceProperties(this.settings))
 				.then((items) => {
 					this.applyMonitorData(buildOnenetMonitorData(items))
 				})
 				.catch((error) => {
 					this.errorMessage = error && error.message ? error.message : '从 OneNet 获取设备数据失败。'
+				})
+				.then(() => {
+					this.loading = false
+					if (isManual) uni.stopPullDownRefresh()
 				})
 		},
 		handleLedToggle(value) {
@@ -123,9 +167,10 @@ export default {
 
 			this.ledSubmitting = true
 			this.errorMessage = ''
-			setDeviceProperty(this.settings, {
-				led: value
-			})
+			Promise.resolve()
+				.then(() => setDeviceProperty(this.settings, {
+					led: value
+				}))
 				.then(() => {
 					uni.showToast({
 						title: `LED 已${value ? '开启' : '关闭'}`,
