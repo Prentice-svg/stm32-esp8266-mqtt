@@ -21,6 +21,13 @@
 				"navigationBarTitleText": "设置",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/camera/camera",
+			"style": {
+				"navigationBarTitleText": "摄像头",
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"globalStyle": {

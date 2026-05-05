@@ -7,40 +7,29 @@
 			</view>
 			<view class="camera-status" :class="{ active: isStreaming }">
 				<text class="status-dot"></text>
-				<text>{{ isStreaming ? '监控中' : '待机' }}</text>
+				<text>{{ isStreaming ? '预览中' : '待机' }}</text>
 			</view>
 		</view>
 
 		<view class="camera-view">
 			<image
-				v-if="frameUrls[0]"
-				class="camera-image"
-				:class="{ active: activeFrameIndex === 0 }"
-				:src="frameUrls[0]"
+				v-if="snapshotUrl"
+				class="camera-image active"
+				:src="snapshotUrl"
 				mode="aspectFill"
-				@load="handleFrameLoaded(0)"
-				@error="handleFrameError(0)"
+				@error="handleImageError"
 			/>
-			<image
-				v-if="frameUrls[1]"
-				class="camera-image"
-				:class="{ active: activeFrameIndex === 1 }"
-				:src="frameUrls[1]"
-				mode="aspectFill"
-				@load="handleFrameLoaded(1)"
-				@error="handleFrameError(1)"
-			/>
-			<view v-if="activeFrameIndex < 0" class="camera-placeholder">
+			<view v-else class="camera-placeholder">
 				<image class="placeholder-icon" src="/static/icons/camera_status_system_d.png" mode="aspectFit" />
-				<text class="placeholder-title">未开始预览</text>
-				<text class="placeholder-text">在设置页填写 ESP32-S3-CAM IP 后启动</text>
+				<text class="placeholder-title">摄像头未打开</text>
+				<text class="placeholder-text">点开始进入连续监控页面</text>
 			</view>
 		</view>
 
 		<view class="camera-actions">
 			<button class="camera-btn primary" @tap="toggleStream">
-				<text class="btn-dot" :class="{ stop: isStreaming }"></text>
-				<text>{{ isStreaming ? '停止' : '开始' }}</text>
+				<text class="btn-dot"></text>
+				<text>开始</text>
 			</button>
 			<button class="camera-btn secondary" @tap="captureSnapshot">
 				<text>📷</text>
@@ -71,12 +60,7 @@ export default {
 		return {
 			isStreaming: false,
 			snapshotVersion: 0,
-			lastMode: 'idle',
-			snapshotTimer: null,
-			frameUrls: ['', ''],
-			activeFrameIndex: -1,
-			pendingFrameIndex: -1,
-			frameLoading: false,
+			snapshotUrl: '',
 			errorNoticeShown: false
 		}
 	},
@@ -115,82 +99,36 @@ export default {
 		}
 	},
 	beforeDestroy() {
-		this.stopStream()
+		this.resetPreview()
 	},
 	beforeUnmount() {
-		this.stopStream()
+		this.resetPreview()
 	},
 	methods: {
 		toggleStream() {
 			if (!this.ensureReady()) return
-			if (this.isStreaming) {
-				this.stopStream()
-			} else {
-				this.startStream()
-			}
-		},
-		startStream() {
-			this.stopStream()
-			this.isStreaming = true
-			this.lastMode = 'stream'
-			this.errorNoticeShown = false
-			this.refreshSnapshot()
-			this.snapshotTimer = setInterval(() => {
-				this.refreshSnapshot()
-			}, 360)
-		},
-		stopStream() {
-			if (this.snapshotTimer) {
-				clearInterval(this.snapshotTimer)
-				this.snapshotTimer = null
-			}
-			this.isStreaming = false
-			this.lastMode = 'idle'
+			uni.navigateTo({
+				url: `/pages/camera/camera?url=${encodeURIComponent(this.baseUrl)}`
+			})
 		},
 		resetPreview() {
-			this.stopStream()
-			this.frameUrls = ['', '']
-			this.activeFrameIndex = -1
-			this.pendingFrameIndex = -1
-			this.frameLoading = false
+			this.isStreaming = false
+			this.snapshotUrl = ''
 			this.errorNoticeShown = false
 		},
 		refreshSnapshot() {
-			if (this.frameLoading || !this.baseUrl) return
 			this.snapshotVersion += 1
-			this.frameLoading = true
-			const nextIndex = this.activeFrameIndex === 0 ? 1 : 0
-			this.pendingFrameIndex = nextIndex
-			this.frameUrls.splice(nextIndex, 1, this.captureUrl)
+			this.snapshotUrl = this.captureUrl
 		},
 		captureSnapshot() {
 			if (!this.ensureReady()) return
-			this.stopStream()
 			this.refreshSnapshot()
-			this.lastMode = 'capture'
-		},
-		handleFrameLoaded(index) {
-			if (index !== this.pendingFrameIndex) return
-			this.activeFrameIndex = index
-			this.pendingFrameIndex = -1
-			this.frameLoading = false
-		},
-		handleFrameError(index) {
-			if (index === this.pendingFrameIndex) {
-				this.pendingFrameIndex = -1
-			}
-			this.frameLoading = false
-			this.handleImageError()
 		},
 		openCameraPage() {
 			if (!this.ensureReady()) return
-			// App 端用内置浏览器打开；H5 端保留当前页面体验。
-			// #ifdef APP-PLUS
-			plus.runtime.openURL(this.baseUrl)
-			// #endif
-			// #ifndef APP-PLUS
-			window.open(this.baseUrl, '_blank')
-			// #endif
+			uni.navigateTo({
+				url: `/pages/camera/camera?url=${encodeURIComponent(this.baseUrl)}`
+			})
 		},
 		ensureReady() {
 			if (!this.enabled) {
@@ -301,7 +239,6 @@ export default {
 	display: block;
 	background: #0F172A;
 	opacity: 0;
-	transition: opacity 120ms linear;
 }
 
 .camera-image.active {
