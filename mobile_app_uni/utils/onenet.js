@@ -1,6 +1,6 @@
 import { sensorList, ledState } from './mockData.js'
 
-const PROPERTY_MAP = {
+export const PROPERTY_MAP = {
 	temperature: {
 		identifier: 'Temp',
 		precision: 1
@@ -22,6 +22,8 @@ const PROPERTY_MAP = {
 	}
 }
 
+export const METRIC_KEYS = ['temperature', 'humidity', 'pressure', 'light']
+
 const UNIT_MAP = sensorList.reduce((result, item) => {
 	result[item.key] = item.unit || ''
 	return result
@@ -37,7 +39,7 @@ function getBaseUrl(settings) {
 	return `https://${host}`
 }
 
-function getDeviceName(settings) {
+export function getDeviceName(settings) {
 	return settings.deviceName || settings.deviceId || ''
 }
 
@@ -48,15 +50,18 @@ function normalizeValue(value) {
 	return value
 }
 
-function parseBoolean(value) {
+export function parseBoolean(value) {
 	const nextValue = normalizeValue(value)
 	if (typeof nextValue === 'boolean') return nextValue
 	if (typeof nextValue === 'number') return nextValue !== 0
-	if (typeof nextValue === 'string') return nextValue.toLowerCase() === 'true' || nextValue === '1'
+	if (typeof nextValue === 'string') {
+		const lowered = nextValue.toLowerCase()
+		return lowered === 'true' || lowered === '1' || lowered === 'on'
+	}
 	return Boolean(nextValue)
 }
 
-function formatMetric(value, precision) {
+export function formatMetric(value, precision) {
 	if (value === null || value === undefined || value === '') return '--'
 	const numericValue = Number(normalizeValue(value))
 	return Number.isFinite(numericValue) ? numericValue.toFixed(precision) : String(value)
@@ -74,7 +79,7 @@ function getNumericLevel(value) {
 	if (!Number.isFinite(numericValue)) {
 		return parseBoolean(value) ? 82 : 28
 	}
-	return Math.max(12, Math.min(88, numericValue))
+	return Math.max(8, Math.min(92, numericValue))
 }
 
 function request(settings, options) {
@@ -84,22 +89,22 @@ function request(settings, options) {
 			method: options.method || 'GET',
 			data: options.data || {},
 			header: {
-				// OneNet 真实鉴权方式以控制台文档为准，当前沿用已验证的 authorization Token 请求头。
-				authorization: settings.token || ''
+				authorization: settings.token || '',
+				...(options.header || {})
 			},
 			success: (res) => {
 				if (!res || !res.data) {
-					reject(new Error('OneNet 返回为空。'))
+					reject(new Error('OneNET 返回为空'))
 					return
 				}
 				if (res.data.code !== 0) {
-					reject(new Error(res.data.msg || 'OneNet 请求失败。'))
+					reject(new Error(res.data.msg || `OneNET 请求失败，code=${res.data.code}`))
 					return
 				}
 				resolve(res.data)
 			},
 			fail: (error) => {
-				reject(new Error(error && error.errMsg ? error.errMsg : 'OneNet 网络请求失败。'))
+				reject(new Error(error && error.errMsg ? error.errMsg : 'OneNET 网络请求失败'))
 			}
 		})
 	})
@@ -107,11 +112,35 @@ function request(settings, options) {
 
 export function validateSettings(settings) {
 	if (!settings || !settings.productId || !getDeviceName(settings) || !settings.serverHost) {
-		throw new Error('请先填写 Product ID、Device ID 和服务器地址。')
+		throw new Error('请先填写 Product ID、Device ID 和服务器地址')
 	}
 	if (settings.dataMode === 'onenet' && !settings.token) {
-		throw new Error('OneNet 模式需要填写 Token。')
+		throw new Error('OneNET 模式需要填写 Token')
 	}
+}
+
+export function queryDeviceDetail(settings) {
+	validateSettings(settings)
+	return request(settings, {
+		path: '/device/detail',
+		method: 'GET',
+		data: {
+			product_id: settings.productId,
+			device_name: getDeviceName(settings)
+		}
+	}).then((body) => body.data || {})
+}
+
+export function queryDeviceStatus(settings) {
+	return queryDeviceDetail(settings).then((detail) => {
+		const status = detail.status
+		const online = status === 1 || status === '1' || status === true || status === 'online'
+		return {
+			online,
+			status,
+			detail
+		}
+	})
 }
 
 export function testConnection(settings) {
@@ -126,11 +155,17 @@ export function testConnection(settings) {
 			}
 
 			validateSettings(settings)
-			queryDeviceProperties(settings)
-				.then(() => {
+			Promise.all([
+				queryDeviceStatus(settings).catch(() => ({
+					online: false
+				})),
+				queryDeviceProperties(settings)
+			])
+				.then(([status]) => {
 					resolve({
 						connected: true,
-						mode: 'onenet'
+						mode: 'onenet',
+						online: status.online
 					})
 				})
 				.catch(reject)
@@ -143,7 +178,6 @@ export function testConnection(settings) {
 export function queryDeviceProperties(settings) {
 	validateSettings(settings)
 	return request(settings, {
-		// OneNet 真实 API 地址以控制台文档为准；此处保留旧版已验证的物模型属性查询路径。
 		path: '/thingmodel/query-device-property',
 		method: 'GET',
 		data: {
@@ -152,7 +186,7 @@ export function queryDeviceProperties(settings) {
 		}
 	}).then((body) => {
 		if (!Array.isArray(body.data)) {
-			throw new Error('设备属性返回格式不符合预期。')
+			throw new Error('设备属性返回格式不符合预期')
 		}
 		return body.data
 	})
@@ -161,9 +195,11 @@ export function queryDeviceProperties(settings) {
 export function setDeviceProperty(settings, params) {
 	validateSettings(settings)
 	return request(settings, {
-		// OneNet 真实 API 地址以控制台文档为准；此处保留旧版已验证的物模型属性设置路径。
 		path: '/thingmodel/set-device-property',
 		method: 'POST',
+		header: {
+			'content-type': 'application/json'
+		},
 		data: {
 			product_id: settings.productId,
 			device_name: getDeviceName(settings),
@@ -175,8 +211,6 @@ export function setDeviceProperty(settings, params) {
 export function queryPropertyHistory(settings, identifier, range = {}) {
 	validateSettings(settings)
 	return request(settings, {
-		// OneNet 历史属性真实 API 路径以控制台文档为准；这里保留适配入口。
-		// 如果控制台接口参数与此处不同，只需要调整这一层，历史页无需改动。
 		path: '/thingmodel/query-device-property-history',
 		method: 'GET',
 		data: {
@@ -184,7 +218,8 @@ export function queryPropertyHistory(settings, identifier, range = {}) {
 			device_name: getDeviceName(settings),
 			identifier,
 			start_time: range.startTime || '',
-			end_time: range.endTime || ''
+			end_time: range.endTime || '',
+			limit: range.limit || 100
 		}
 	}).then((body) => {
 		if (body.data && Array.isArray(body.data.list)) {
@@ -210,11 +245,13 @@ export function buildHistoryRows(key, rows) {
 		.map((row) => {
 			const rawValue = normalizeValue(row.value)
 			const displayValue = key === 'led'
-				? (parseBoolean(rawValue) ? '开启' : '关闭')
+				? (parseBoolean(rawValue) ? '打开' : '关闭')
 				: formatMetric(rawValue, config ? config.precision : 1)
 			return {
 				time: formatTime(row.time),
+				rawValue,
 				value: unit ? `${displayValue} ${unit}` : displayValue,
+				displayValue,
 				status: '正常',
 				level: getNumericLevel(rawValue)
 			}

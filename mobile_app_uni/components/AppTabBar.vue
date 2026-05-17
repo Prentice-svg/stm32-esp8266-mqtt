@@ -8,7 +8,7 @@
 				:class="{ active: active === item.key }"
 				@tap="go(item)"
 			>
-				<text class="tab-icon">{{ item.icon }}</text>
+				<image class="tab-icon" :src="item.iconPath" mode="aspectFit" />
 				<text class="tab-text">{{ item.text }}</text>
 			</view>
 		</view>
@@ -27,9 +27,9 @@ export default {
 	data() {
 		return {
 			tabs: [
-				{ key: 'monitor', text: '监测', icon: '⌁', url: '/pages/monitor/monitor' },
-				{ key: 'history', text: '历史', icon: '□', url: '/pages/history/history' },
-				{ key: 'settings', text: '设置', icon: '⚙', url: '/pages/settings/settings' }
+				{ key: 'monitor', text: '监控', iconPath: '/static/icons/cloud_connection_status_system_d.png', url: '/pages/monitor/monitor' },
+				{ key: 'history', text: '历史', iconPath: '/static/icons/timer_status_system_d.png', url: '/pages/history/history' },
+				{ key: 'settings', text: '设置', iconPath: '/static/icons/mode_setting_device_b.png', url: '/pages/settings/settings' }
 			]
 		}
 	},
@@ -59,7 +59,7 @@ export default {
 .tab-bar {
 	height: 104rpx;
 	padding: 10rpx;
-	border-radius: 36rpx;
+	border-radius: 28rpx;
 	background: #FFFFFF;
 	box-shadow: 0 -8rpx 34rpx rgba(15, 23, 42, 0.1);
 	display: flex;
@@ -68,7 +68,7 @@ export default {
 
 .tab-item {
 	flex: 1;
-	border-radius: 28rpx;
+	border-radius: 22rpx;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -84,8 +84,8 @@ export default {
 }
 
 .tab-icon {
-	font-size: 28rpx;
-	line-height: 1;
+	width: 34rpx;
+	height: 34rpx;
 }
 
 .tab-text {

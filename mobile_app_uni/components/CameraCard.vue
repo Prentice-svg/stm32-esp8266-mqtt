@@ -30,7 +30,7 @@
 			<view v-if="!activeSnapshotUrl && !nextSnapshotUrl" class="camera-placeholder">
 				<image class="placeholder-icon" src="/static/icons/camera_status_system_d.png" mode="aspectFit" />
 				<text class="placeholder-title">摄像头未打开</text>
-				<text class="placeholder-text">点开始在首页预览画面</text>
+				<text class="placeholder-text">点击开始在首页预览画面</text>
 			</view>
 		</view>
 
@@ -40,11 +40,9 @@
 				<text>{{ isStreaming ? '停止' : '开始' }}</text>
 			</button>
 			<button class="camera-btn secondary" @tap="captureSnapshot">
-				<text>📷</text>
 				<text>截图</text>
 			</button>
 			<button class="camera-btn secondary" @tap="openCameraPage">
-				<text>↗</text>
 				<text>打开</text>
 			</button>
 		</view>
@@ -85,9 +83,6 @@ export default {
 				return this.normalizedIp.replace(/\/$/, '')
 			}
 			return `http://${this.normalizedIp}`
-		},
-		streamUrl() {
-			return this.baseUrl ? `${this.baseUrl}/stream` : ''
 		},
 		captureUrl() {
 			if (!this.baseUrl) return ''
@@ -203,7 +198,7 @@ export default {
 .camera-card {
 	margin-top: 24rpx;
 	padding: 28rpx;
-	border-radius: 32rpx;
+	border-radius: 28rpx;
 	background: #FFFFFF;
 	box-shadow: 0 16rpx 38rpx rgba(15, 23, 42, 0.065);
 	border: 1rpx solid rgba(226, 232, 240, 0.72);
@@ -342,7 +337,7 @@ export default {
 }
 
 .camera-btn.primary {
-	background: linear-gradient(135deg, #2563EB 0%, #14B8A6 100%);
+	background: #2563EB;
 	color: #FFFFFF;
 }
 

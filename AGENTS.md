@@ -45,6 +45,7 @@ Do not use the older identifiers `EnvironmentHumidity`, `EnvironmentTemperature`
 ## Firmware Guardrails
 
 - Use `AT+MQTTPUBRAW` for full property posts. Do not switch back to long `AT+MQTTPUB`.
+- If Keil CMSIS-DAP reports device mismatch or cannot access `0x00000000`, use `repo\tools\flash_daplink_openocd.ps1`; DAPLink + OpenOCD is validated for this board.
 - Keep `configPRIO_BITS = 3`.
 - Keep `NVIC_SetPriorityGrouping(0)` after `HAL_Init()`.
 - Keep ESP USART3 and DMA1_Channel3 IRQ priorities FreeRTOS-safe; current working value is `10`.

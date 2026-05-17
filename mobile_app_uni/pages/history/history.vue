@@ -1,82 +1,76 @@
 <template>
 	<view class="page">
-		<AppHeader title="历史数据" subtitle="查看监测点变化趋势" />
+		<AppHeader title="历史数据" subtitle="查看 OneNET 物模型属性趋势" />
 
-		<SectionCard>
-			<view class="point-list">
-				<view
-					v-for="point in points"
-					:key="point.key"
-					class="point-row"
-					:class="{ active: activeKey === point.key }"
-					@tap="selectPoint(point.key)"
-				>
-					<view class="point-icon">
-						<image v-if="point.iconPath" class="point-icon-img" :src="point.iconPath" mode="aspectFit" />
-						<text v-else>{{ point.icon }}</text>
-					</view>
-					<view class="point-main">
-						<text class="point-name">{{ point.label }}</text>
-						<text class="point-desc">{{ point.unit || '开关状态' }}</text>
-					</view>
-					<text class="point-arrow">›</text>
+		<view class="point-list">
+			<view
+				v-for="point in points"
+				:key="point.key"
+				class="point-row"
+				:class="{ active: activeKey === point.key }"
+				@tap="selectPoint(point.key)"
+			>
+				<image class="point-icon" :src="point.iconPath" mode="aspectFit" />
+				<view class="point-main">
+					<text class="point-name">{{ point.label }}</text>
+					<text class="point-desc">{{ getIdentifier(point.key) }} · {{ point.unit }}</text>
 				</view>
+				<text class="point-arrow">›</text>
 			</view>
-		</SectionCard>
+		</view>
 
-		<SectionCard :title="activePoint.label + '趋势'" :subtitle="historySubtitle">
-			<template #action>
+		<view class="history-card">
+			<view class="card-head">
+				<view>
+					<text class="card-title">{{ activePoint.label }}趋势</text>
+					<text class="card-subtitle">{{ historySubtitle }}</text>
+				</view>
 				<view class="period-tabs">
 					<text
 						v-for="item in periods"
-						:key="item"
+						:key="item.key"
 						class="period-tab"
-						:class="{ active: period === item }"
-						@tap="selectPeriod(item)"
+						:class="{ active: period === item.key }"
+						@tap="selectPeriod(item.key)"
 					>
-						{{ item }}
+						{{ item.text }}
 					</text>
 				</view>
-			</template>
-			<view class="chart-card">
-				<view class="chart-grid">
-					<text class="grid-line"></text>
-					<text class="grid-line"></text>
-					<text class="grid-line"></text>
-				</view>
-				<view class="bar-chart">
-					<view v-for="item in activeRows" :key="item.time" class="bar-item">
+			</view>
+
+			<view v-if="loadingHistory" class="empty-box">
+				<text>正在读取 OneNET 历史数据...</text>
+			</view>
+			<view v-else-if="historyError" class="empty-box warning">
+				<text>{{ historyError }}</text>
+			</view>
+			<view v-else-if="activeRows.length">
+				<view class="chart-card">
+					<view v-for="item in chartRows" :key="item.time + item.value" class="bar-item">
 						<view class="bar-track">
 							<view class="bar-fill" :style="{ height: `${item.level}%` }"></view>
 						</view>
 						<text class="bar-time">{{ item.time }}</text>
 					</view>
 				</view>
-				<view class="chart-summary">
-					<text class="summary-label">当前</text>
-					<text class="summary-value">{{ latestRow.value }}</text>
-				</view>
-			</view>
-			<view v-if="historyError" class="history-error">
-				<text>{{ historyError }}</text>
-			</view>
-		</SectionCard>
 
-		<SectionCard title="历史记录">
-			<view v-if="activeRows.length" class="record-table">
-				<view class="record-row head">
-					<text>时间</text>
-					<text>数值</text>
-					<text>状态</text>
-				</view>
-				<view v-for="row in activeRows" :key="row.time" class="record-row">
-					<text>{{ row.time }}</text>
-					<text>{{ row.value }}</text>
-					<text class="success-text">{{ row.status }}</text>
+				<view class="record-table">
+					<view class="record-row head">
+						<text>时间</text>
+						<text>数值</text>
+						<text>状态</text>
+					</view>
+					<view v-for="row in activeRows" :key="row.time + row.value" class="record-row">
+						<text>{{ row.time }}</text>
+						<text>{{ row.value }}</text>
+						<text class="success-text">{{ row.status }}</text>
+					</view>
 				</view>
 			</view>
-			<EmptyState v-else title="暂无历史记录" text="当前监测点还没有记录" />
-		</SectionCard>
+			<view v-else class="empty-box">
+				<text>暂无历史数据</text>
+			</view>
+		</view>
 
 		<AppTabBar active="history" />
 	</view>
@@ -85,9 +79,7 @@
 <script>
 import AppHeader from '../../components/AppHeader.vue'
 import AppTabBar from '../../components/AppTabBar.vue'
-import SectionCard from '../../components/SectionCard.vue'
-import EmptyState from '../../components/EmptyState.vue'
-import { monitorPoints, historyMap } from '../../utils/mockData.js'
+import { sensorList, historyMap } from '../../utils/mockData.js'
 import { loadHistoryMap } from '../../utils/history.js'
 import { loadSettings } from '../../utils/storage.js'
 import { buildHistoryRows, getPropertyIdentifier, queryPropertyHistory } from '../../utils/onenet.js'
@@ -95,21 +87,23 @@ import { buildHistoryRows, getPropertyIdentifier, queryPropertyHistory } from '.
 export default {
 	components: {
 		AppHeader,
-		AppTabBar,
-		SectionCard,
-		EmptyState
+		AppTabBar
 	},
 	data() {
 		return {
 			settings: loadSettings(),
-			points: monitorPoints,
+			points: sensorList,
 			localHistory: {},
 			remoteRows: [],
 			historyError: '',
 			loadingHistory: false,
 			activeKey: 'temperature',
-			period: '日',
-			periods: ['日', '周', '月']
+			period: 'day',
+			periods: [
+				{ key: 'day', text: '日' },
+				{ key: 'week', text: '周' },
+				{ key: 'month', text: '月' }
+			]
 		}
 	},
 	onShow() {
@@ -122,30 +116,23 @@ export default {
 			return this.points.find((item) => item.key === this.activeKey) || this.points[0]
 		},
 		activeRows() {
-			if (this.remoteRows.length) {
-				return this.remoteRows
-			}
+			if (this.remoteRows.length) return this.remoteRows
 			const rows = this.localHistory[this.activeKey] || []
 			return rows.length ? rows : (historyMap[this.activeKey] || [])
 		},
-		hasRemoteRows() {
-			return this.remoteRows.length > 0
-		},
-		hasLocalRows() {
-			return Boolean(this.localHistory[this.activeKey] && this.localHistory[this.activeKey].length)
+		chartRows() {
+			return this.activeRows.slice(-12)
 		},
 		historySubtitle() {
-			if (this.loadingHistory) return '正在读取 OneNet 历史'
-			if (this.hasRemoteRows) return 'OneNet 历史记录'
-			return this.hasLocalRows ? '本地真实记录' : '暂无真实记录，显示示例数据'
-		},
-		latestRow() {
-			return this.activeRows[this.activeRows.length - 1] || {
-				value: '--'
-			}
+			if (this.loadingHistory) return '正在读取 OneNET'
+			if (this.remoteRows.length) return 'OneNET 历史记录'
+			return '本地记录或示例数据'
 		}
 	},
 	methods: {
+		getIdentifier(key) {
+			return getPropertyIdentifier(key)
+		},
 		selectPoint(key) {
 			if (this.activeKey === key) return
 			this.activeKey = key
@@ -159,13 +146,14 @@ export default {
 		getRange() {
 			const endTime = Date.now()
 			const durationMap = {
-				日: 24 * 60 * 60 * 1000,
-				周: 7 * 24 * 60 * 60 * 1000,
-				月: 30 * 24 * 60 * 60 * 1000
+				day: 24 * 60 * 60 * 1000,
+				week: 7 * 24 * 60 * 60 * 1000,
+				month: 30 * 24 * 60 * 60 * 1000
 			}
 			return {
-				startTime: endTime - (durationMap[this.period] || durationMap.日),
-				endTime
+				startTime: endTime - (durationMap[this.period] || durationMap.day),
+				endTime,
+				limit: 100
 			}
 		},
 		loadRemoteHistory() {
@@ -182,13 +170,11 @@ export default {
 			this.loadingHistory = true
 			queryPropertyHistory(this.settings, identifier, this.getRange())
 				.then((rows) => {
-					this.remoteRows = buildHistoryRows(this.activeKey, rows).slice(-24)
+					this.remoteRows = buildHistoryRows(this.activeKey, rows)
 					this.loadingHistory = false
 				})
 				.catch((error) => {
-					this.historyError = error && error.message
-						? `OneNet 历史读取失败，已显示本地记录：${error.message}`
-						: 'OneNet 历史读取失败，已显示本地记录。'
+					this.historyError = error && error.message ? error.message : 'OneNET 历史读取失败'
 					this.loadingHistory = false
 				})
 		}
@@ -207,14 +193,21 @@ export default {
 	gap: 24rpx;
 }
 
+.point-list,
+.history-card {
+	border-radius: 28rpx;
+	background: #FFFFFF;
+	box-shadow: 0 16rpx 38rpx rgba(15, 23, 42, 0.065);
+	border: 1rpx solid rgba(226, 232, 240, 0.72);
+}
+
 .point-list {
 	overflow: hidden;
-	border-radius: 24rpx;
 }
 
 .point-row {
-	min-height: 104rpx;
-	padding: 0 8rpx;
+	min-height: 106rpx;
+	padding: 0 26rpx;
 	display: flex;
 	align-items: center;
 	gap: 18rpx;
@@ -226,24 +219,10 @@ export default {
 }
 
 .point-row.active {
-	margin: 0 -8rpx;
-	padding: 0 16rpx;
-	border-radius: 24rpx;
-	background: linear-gradient(90deg, rgba(37, 99, 235, 0.12), rgba(20, 184, 166, 0.08));
+	background: #EFF6FF;
 }
 
 .point-icon {
-	width: 68rpx;
-	height: 68rpx;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 30rpx;
-	background: #F8FAFC;
-}
-
-.point-icon-img {
 	width: 58rpx;
 	height: 58rpx;
 }
@@ -256,7 +235,7 @@ export default {
 .point-name {
 	display: block;
 	font-size: 28rpx;
-	font-weight: 850;
+	font-weight: 900;
 	color: #0F172A;
 }
 
@@ -268,7 +247,36 @@ export default {
 }
 
 .point-arrow {
-	font-size: 38rpx;
+	font-size: 40rpx;
+	color: #94A3B8;
+}
+
+.history-card {
+	padding: 28rpx;
+}
+
+.card-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 18rpx;
+	margin-bottom: 22rpx;
+}
+
+.card-title,
+.card-subtitle {
+	display: block;
+}
+
+.card-title {
+	font-size: 30rpx;
+	font-weight: 900;
+	color: #0F172A;
+}
+
+.card-subtitle {
+	margin-top: 6rpx;
+	font-size: 22rpx;
 	color: #94A3B8;
 }
 
@@ -292,47 +300,19 @@ export default {
 
 .period-tab.active {
 	color: #FFFFFF;
-	background: linear-gradient(135deg, #2563EB 0%, #14B8A6 100%);
-	box-shadow: 0 8rpx 18rpx rgba(37, 99, 235, 0.22);
+	background: #2563EB;
 }
 
 .chart-card {
-	position: relative;
 	height: 306rpx;
-	padding: 28rpx 28rpx 22rpx;
-	border-radius: 28rpx;
-	background: linear-gradient(180deg, #FFFFFF 0%, #F8FBFF 100%);
-	overflow: hidden;
+	padding: 28rpx 18rpx 18rpx;
+	border-radius: 24rpx;
+	background: #F8FAFC;
 	border: 1rpx solid #E2E8F0;
+	display: flex;
+	align-items: flex-end;
+	gap: 14rpx;
 	box-sizing: border-box;
-}
-
-.chart-grid {
-	position: absolute;
-	left: 28rpx;
-	right: 28rpx;
-	top: 40rpx;
-	bottom: 62rpx;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-}
-
-.grid-line {
-	height: 1rpx;
-	background: #E2E8F0;
-}
-
-.bar-chart {
-	position: absolute;
-	left: 40rpx;
-	right: 40rpx;
-	bottom: 22rpx;
-	top: 48rpx;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 20rpx;
 }
 
 .bar-item {
@@ -342,15 +322,17 @@ export default {
 	flex-direction: column;
 	align-items: center;
 	justify-content: flex-end;
-	gap: 12rpx;
+	gap: 10rpx;
+	min-width: 0;
 }
 
 .bar-track {
 	position: relative;
-	width: 34rpx;
+	width: 100%;
+	max-width: 32rpx;
 	flex: 1;
 	border-radius: 999rpx;
-	background: #EEF4FF;
+	background: #E2E8F0;
 	overflow: hidden;
 }
 
@@ -360,49 +342,16 @@ export default {
 	right: 0;
 	bottom: 0;
 	border-radius: 999rpx;
-	background: linear-gradient(180deg, #2563EB 0%, #14B8A6 100%);
-	box-shadow: 0 8rpx 16rpx rgba(37, 99, 235, 0.18);
+	background: #2563EB;
 }
 
 .bar-time {
-	font-size: 20rpx;
+	font-size: 18rpx;
 	color: #94A3B8;
 }
 
-.chart-summary {
-	position: absolute;
-	right: 24rpx;
-	top: 22rpx;
-	padding: 10rpx 16rpx;
-	border-radius: 999rpx;
-	background: rgba(20, 184, 166, 0.1);
-	display: flex;
-	align-items: baseline;
-	gap: 8rpx;
-}
-
-.history-error {
-	margin-top: 16rpx;
-	padding: 16rpx 18rpx;
-	border-radius: 20rpx;
-	background: rgba(245, 158, 11, 0.1);
-	color: #B45309;
-	font-size: 22rpx;
-	line-height: 1.45;
-}
-
-.summary-label {
-	font-size: 20rpx;
-	color: #64748B;
-}
-
-.summary-value {
-	font-size: 24rpx;
-	font-weight: 900;
-	color: #14B8A6;
-}
-
 .record-table {
+	margin-top: 22rpx;
 	display: flex;
 	flex-direction: column;
 }
@@ -426,7 +375,28 @@ export default {
 }
 
 .success-text {
-	color: #22C55E;
+	color: #16A34A;
 	font-weight: 850;
+}
+
+.empty-box {
+	min-height: 260rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	color: #64748B;
+	font-size: 26rpx;
+}
+
+.empty-box.warning {
+	color: #B45309;
+}
+
+@media screen and (min-width: 900px) {
+	.page {
+		max-width: 1180px;
+		margin: 0 auto;
+	}
 }
 </style>

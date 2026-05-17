@@ -129,6 +129,33 @@ App 目录：`repo/mobile_app_uni`
 3. 如果调 App：打开 `repo/mobile_app_uni`
 4. 如果让 Codex 继续：明确说使用 `$stm32-esp32c3-onenet-terminal`
 
+## DAPLink 下载说明
+
+Keil 的 CMSIS-DAP 插件在这个 DAPLink 上可能报：
+
+```text
+Connection refused due to device mismatch
+Cannot access Memory (@ 0x00000000, Write, Acc Size: 4 Byte)
+Target DLL has been cancelled
+```
+
+这不是 SWD 接线失败。OpenOCD 已验证 DAPLink 可以识别并烧录目标：
+
+```text
+SWD DPIDR 0x2ba01477
+Cortex-M3 r2p0 processor detected
+device id = 0x10010414
+flash size = 256 KiB
+```
+
+推荐使用脚本烧录：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File E:\Dev\stm32-esp-mqtt\repo\tools\flash_daplink_openocd.ps1
+```
+
+脚本会先调用 Keil 编译，再通过 OpenOCD `cmsis-dap.cfg + stm32f1x.cfg` 写入并校验 HEX，最后 `reset run`。
+
 ## 最后一次成功日志特征
 
 ```text

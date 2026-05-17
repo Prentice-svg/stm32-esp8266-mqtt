@@ -1,5 +1,4 @@
 #include "oled/bsp_i2c_oled.h"
-#include "led/bsp_led.h"
 #include "types/app_screen_type.h"
 #include "types/app_sensor_data.h"
 #include "cmsis_os2.h"
@@ -29,36 +28,38 @@ static uint8_t OLED_ClampPercent(float value)
 	return (uint8_t)(value + 0.5f);
 }
 
+static void OLED_ShowLabelValue(int16_t label_x, int16_t y, char *label, int16_t value_x, char *format, float value)
+{
+	OLED_ShowChinese(label_x, y, label);
+	OLED_Printf(value_x, y + 4, OLED_6X8, format, value);
+}
+
 static void OLED_DisplayOverview(void)
 {
-	OLED_DrawHeader("P1 OVERVIEW");
-	OLED_Printf(92, 4, OLED_6X8, "LED%s", LED_IsOn(LED_ONBOARD) ? "ON" : "OFF");
-
 	if (global_display_data.dht11_check_result == DHT11_DATA_OK)
 	{
-		OLED_Printf(0, 18, OLED_6X8, "TEMP %5.1fC", global_display_data.temp_value);
-		OLED_Printf(0, 27, OLED_6X8, "HUMI %5.1f%%", global_display_data.humi_value);
-		OLED_Printf(0, 36, OLED_6X8, "PRES %6.1fhPa", global_display_data.pressure_hpa);
+		OLED_ShowLabelValue(0, 0, "温度", 40, "%5.1fC", global_display_data.temp_value);
+		OLED_ShowLabelValue(0, 16, "湿度", 40, "%5.1f%%", global_display_data.humi_value);
+		OLED_ShowLabelValue(0, 32, "大气压", 56, "%6.1fhPa", global_display_data.pressure_hpa);
 	}
 	else
 	{
-		OLED_ShowString(0, 24, "AHT20/BMP ERROR", OLED_6X8);
+		OLED_ShowString(0, 8, "AHT20/BMP ERROR", OLED_6X8);
 	}
 
-	OLED_Printf(0, 45, OLED_6X8, "LIGHT %5.1f%%", global_display_data.light_percentage_value);
-	OLED_ShowString(0, 56, "K1:NEXT K2:LED", OLED_6X8);
+	OLED_ShowLabelValue(0, 48, "光强", 40, "%5.1f%%", global_display_data.light_percentage_value);
 }
 
 static void OLED_DisplayTempHumi(void)
 {
-	OLED_DrawHeader("P2 TEMP HUMI");
+	OLED_DrawHeader("P2");
 
 	if (global_display_data.dht11_check_result == DHT11_DATA_OK)
 	{
-		OLED_ShowString(0, 19, "TEMP", OLED_6X8);
-		OLED_Printf(0, 27, OLED_8X16, "%5.1f C", global_display_data.temp_value);
-		OLED_ShowString(0, 45, "HUMI", OLED_6X8);
-		OLED_Printf(0, 53, OLED_6X8, "%5.1f %%RH", global_display_data.humi_value);
+		OLED_ShowChinese(0, 19, "温度");
+		OLED_Printf(40, 19, OLED_8X16, "%5.1f C", global_display_data.temp_value);
+		OLED_ShowChinese(0, 43, "湿度");
+		OLED_Printf(40, 47, OLED_6X8, "%5.1f %%RH", global_display_data.humi_value);
 	}
 	else
 	{
@@ -68,13 +69,13 @@ static void OLED_DisplayTempHumi(void)
 
 static void OLED_DisplayPressure(void)
 {
-	OLED_DrawHeader("P3 PRESSURE");
+	OLED_DrawHeader("P3");
 
 	if (global_display_data.dht11_check_result == DHT11_DATA_OK)
 	{
-		OLED_ShowString(0, 19, "CURRENT", OLED_6X8);
-		OLED_Printf(0, 27, OLED_8X16, "%7.2f", global_display_data.pressure_hpa);
-		OLED_ShowString(88, 35, "hPa", OLED_6X8);
+		OLED_ShowChinese(0, 19, "大气压");
+		OLED_Printf(50, 19, OLED_8X16, "%7.2f", global_display_data.pressure_hpa);
+		OLED_ShowString(108, 35, "hPa", OLED_6X8);
 		OLED_Printf(0, 46, OLED_6X8, "MAX %7.2f", global_display_data.pressure_hpa_max);
 		OLED_Printf(0, 56, OLED_6X8, "MIN %7.2f", global_display_data.pressure_hpa_min);
 	}
@@ -88,9 +89,9 @@ static void OLED_DisplayLight(void)
 {
 	uint8_t bar_width = OLED_ClampPercent(global_display_data.light_percentage_value);
 
-	OLED_DrawHeader("P4 LIGHT");
-	OLED_ShowString(0, 19, "LEVEL", OLED_6X8);
-	OLED_Printf(0, 27, OLED_8X16, "%5.1f %%", global_display_data.light_percentage_value);
+	OLED_DrawHeader("P4");
+	OLED_ShowChinese(0, 19, "光强");
+	OLED_Printf(40, 19, OLED_8X16, "%5.1f %%", global_display_data.light_percentage_value);
 	OLED_DrawRectangle(0, 46, 102, 10, OLED_UNFILLED);
 	OLED_DrawRectangle(2, 48, bar_width, 6, OLED_FILLED);
 	OLED_Printf(106, 47, OLED_6X8, "%3d", bar_width);
